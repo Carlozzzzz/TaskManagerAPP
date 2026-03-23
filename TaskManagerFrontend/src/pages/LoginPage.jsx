@@ -53,8 +53,6 @@ export default function LoginPage() {
 
 			setAuth(data);
 			navigate('/tasks');
-			const message = 'Login successfully.';
-			showToast(message, 'success');
 		} catch (err) {
 			// MODIFIED — Improved error extraction from Axios
 			const message = err.response?.data?.message || err.response?.data || 'Invalid credentials';

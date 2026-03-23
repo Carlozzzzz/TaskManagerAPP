@@ -77,58 +77,30 @@ export default function TasksPage() {
 	const handleFilterChange = (status) => setActiveFilter(status);
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="flex flex-col gap-4">
+			<TaskFilter
+				onFilterChange={handleFilterChange}
+				activeFilter={activeFilter}
+				taskCounts={taskCounts}
+			/>
+			<TaskForm onSubmit={handleCreate} loading={submitting} />
 
-			{/* Navbar */}
-			<nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-				<h1 className="font-semibold text-gray-800">Task Manager</h1>
-				<div className="flex items-center gap-4">
-					{user?.role === 'admin' && (
-						<button
-							onClick={() => navigate('/admin')}
-							className="text-sm text-purple-500 hover:text-purple-700 transition-colors font-medium"
-						>
-							Admin Panel
-						</button>
-					)}
-					<span className="text-sm text-gray-500">
-						Hi, <span className="font-medium text-gray-700">{user?.name}</span>
-					</span>
-					<button
-						onClick={logout}
-						className="text-sm text-red-400 hover:text-red-600 transition-colors"
-					>
-						Logout
-					</button>
+			{loading ? (
+				<p className="text-center text-gray-400 text-sm">Loading tasks...</p>
+			) : filteredTasks.length === 0 ? (
+				<p className="text-center text-gray-400 text-sm">No tasks yet. Add one above.</p>
+			) : (
+				<div className="flex flex-col gap-3">
+					{filteredTasks.map(task => (
+						<TaskCard
+							key={task.id}
+							task={task}
+							onDelete={handleDelete}
+							onUpdateStatus={() => handleUpdateStatus(task.id, task.status)}
+						/>
+					))}
 				</div>
-			</nav>
-
-			{/* Main content */}
-			<div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
-				<TaskFilter
-					onFilterChange={handleFilterChange}
-					activeFilter={activeFilter}
-					taskCounts={taskCounts}
-				/>
-				<TaskForm onSubmit={handleCreate} loading={submitting} />
-
-				{loading ? (
-					<p className="text-center text-gray-400 text-sm">Loading tasks...</p>
-				) : filteredTasks.length === 0 ? (
-					<p className="text-center text-gray-400 text-sm">No tasks yet. Add one above.</p>
-				) : (
-					<div className="flex flex-col gap-3">
-						{filteredTasks.map(task => (
-							<TaskCard
-								key={task.id}
-								task={task}
-								onDelete={handleDelete}
-								onUpdateStatus={() => handleUpdateStatus(task.id, task.status)}
-							/>
-						))}
-					</div>
-				)}
-			</div>
+			)}
 		</div>
 	);
 }

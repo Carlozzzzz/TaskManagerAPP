@@ -2,28 +2,37 @@
 import axios from 'axios';
 
 const api = axios.create({
-	baseURL: 'http://localhost:5154/api', // ← change port to match your API
+	baseURL: 'http://localhost:5154/api',
 });
 
-// ADDED — intercept every request and attach token if it exists
+// 1. Create a placeholder for the logout function
+let logoutHandler = null;
+
+// 2. Export a function to "inject" the real logout logic later
+export const injectLogout = (fn) => {
+	logoutHandler = fn;
+};
+
 api.interceptors.request.use(config => {
 	const token = localStorage.getItem('token');
-	if (token) {
-		config.headers.Authorization = `Bearer ${token}`;
-	}
+	if (token) config.headers.Authorization = `Bearer ${token}`;
 	return config;
 });
 
-// ADDED — intercept every response, if 401 → clear token and redirect to login
 api.interceptors.response.use(
-	response => response,
+	res => res,
 	error => {
-		// MODIFIED — Only redirect if it's a 401 AND NOT a login/register attempt
-		const isAuthRequest = error.config.url.includes('/auth/login') || error.config.url.includes('/auth/register');
-
-		if (error.response?.status === 401 && !isAuthRequest) {
-			localStorage.removeItem('token');
-			window.location.href = '/login';
+		// 3. If we get a 401 (Unauthorized) and it's not the login page itself
+		if (error.response?.status === 401 && !error.config.url.includes('/auth/login')) {
+			if (logoutHandler) {
+				// 4. Call the injected React logout function!
+				// This will trigger the toast and redirect automatically.
+				logoutHandler();
+			} else {
+				// Fallback if injection hasn't happened yet
+				localStorage.clear();
+				window.location.href = '/login';
+			}
 		}
 		return Promise.reject(error);
 	}

@@ -5,7 +5,7 @@ import Toast from "../components/Toast";
 
 const ToastContext = createContext();
 
-export function ToastProivider({ children }) {
+export function ToastProvider({ children }) {
 	const [toast, setToast] = useState(null);
 
 	// Function to trigger the toast from anywhere
@@ -20,6 +20,7 @@ export function ToastProivider({ children }) {
 	return (
 		<ToastContext.Provider value={{ showToast }}>
 			{children}
+			
 			{/* ADDED - This is the "ONE PLACE".
 			It sits above all routes and pages.
 		*/}
