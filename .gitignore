@@ -1,0 +1,39 @@
+# ──────────────────────────────────────
+# UNIFIED CONFIG — TaskManagerApp
+# ──────────────────────────────────────
+
+# --- General / OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+logs/
+
+# --- Frontend (React/Vite) ---
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.vite/
+**/*.local
+**/.env
+**/.env.*.local
+
+# --- Backend (.NET/C#) ---
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+**/appsettings.Development.json
+**/publish/
+**/*.pubxml
+**/*.pubxml.user
+**/TaskManagerAPI.http
+
+# --- Tooling ---
+.vscode/
+**/*.tsbuildinfo
+**/project.lock.json
+**/artifacts/
