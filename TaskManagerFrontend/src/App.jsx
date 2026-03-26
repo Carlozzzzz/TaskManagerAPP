@@ -1,25 +1,29 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext'; // Fixed typo from 'Proivider'
+import { AuthProvider } from './context/AuthProvider';
+import { ToastProvider } from './context/ToastProvider'; // Fixed typo from 'Proivider'
+import { LoadingProvider } from './context/LoadingProvider';
+
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Layout Components
 import MainLayout from './components/layout/MainLayout'; // ADDED
 
-// Pages
 import LoginPage from './pages/LoginPage';
-import TasksPage from './pages/TasksPage';
 import AdminPage from './pages/AdminPage';
+import TasksPage from './pages/TasksPage';
+import LoadingSpinner from './components/shared/LoadingSpinner';
 
 export default function App() {
 	return (
 		<BrowserRouter>
-			<ToastProvider>
-				<AuthProvider>
-					<AppContent />
-				</AuthProvider>
-			</ToastProvider>
+			<LoadingProvider>
+				<ToastProvider>
+					<AuthProvider>
+						<LoadingSpinner />
+						<AppContent />
+					</AuthProvider>
+				</ToastProvider>
+			</LoadingProvider>
 		</BrowserRouter>
 	);
 }

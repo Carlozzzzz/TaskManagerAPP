@@ -16,6 +16,10 @@ export default function TaskForm({ onSubmit, loading }) {
 			errors.title = 'Task title is required.';
 		if (!dueDate)
 			errors.dueDate = 'Due date is required.';
+		
+		const isPastDue = new Date(dueDate) < new Date();
+		if(dueDate && isPastDue)
+			errors.dueDate = 'Please select today or a future date.'
 		return errors;
 	};
 

@@ -5,7 +5,14 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      zIndex: {
+        'header': '50',
+        'modal': '100',
+        'toast': '9000',
+        'spinner': '9999',
+      }
+    }
   },
   plugins: [],
 }

@@ -1,4 +1,4 @@
-// src/components/Toast.jsx
+// src/components/shared/Toast.jsx
 import { useEffect, useState } from 'react';
 
 // ADDED — type config: color + icon per type
@@ -55,7 +55,7 @@ export default function Toast({ toast, onHide }) {
     // ADDED — fixed position: bottom-right corner, above everything
     <div
       className={`
-        fixed top-6 right-6 z-50
+        fixed top-6 right-6 z-toast
         flex items-start gap-2
         border rounded-lg px-4 py-3 shadow-md
         text-sm max-w-sm w-full

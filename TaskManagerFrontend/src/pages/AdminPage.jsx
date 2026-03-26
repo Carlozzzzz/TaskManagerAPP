@@ -1,23 +1,21 @@
 // src/pages/AdminPage.jsx
 import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { getAllTasksAdmin, getAllUsers } from '../services/adminService';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../hooks/useToast';
+import { useLoading } from '../hooks/useLoading';
 
 export default function AdminPage() {
-	const { user, logout } = useAuth();
-	const navigate = useNavigate();
-
 	const { showToast } = useToast();
 
 	const [tasks, setTasks] = useState([]);
 	const [users, setUsers] = useState([]);
-	const [loading, setLoading] = useState(true);
 	const [activeTab, setActiveTab] = useState('tasks');
+	
+	const { loading, showLoading, hideLoading } = useLoading();
 
 	useEffect(() => {
 		const fetchData = async () => {
+			showLoading();
 			try {
 				const [tasksData, usersData] = await Promise.all([
 					getAllTasksAdmin(),
@@ -29,7 +27,7 @@ export default function AdminPage() {
 				// MODIFIED — was console.error, now shows toast
 				showToast('Failed to load admin data. Please refresh the page.', 'error');
 			} finally {
-				setLoading(false);
+				hideLoading();
 			}
 		};
 		fetchData();

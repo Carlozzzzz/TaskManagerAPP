@@ -1,16 +1,13 @@
 // src/pages/TasksPage.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 import { useTasks } from '../hooks/useTasks';
 import { createTask, deleteTask, updateTaskStatus } from '../services/taskService';
-import TaskCard from '../components/TaskCard';
-import TaskForm from '../components/TaskForm';
-import TaskFilter from '../components/TaskFilter';
-import { useToast } from '../context/ToastContext';
+import TaskCard from '../components/modules/TaskCard';
+import TaskForm from '../components/modules/TaskForm';
+import TaskFilter from '../components/modules/TaskFilter';
+import { useToast } from '../hooks/useToast';
 
 export default function TasksPage() {
-	const { user, logout } = useAuth();
 	const { tasks, loading, refetch } = useTasks();
 	const [submitting, setSubmitting] = useState(false);
 	const [activeFilter, setActiveFilter] = useState('all');
@@ -33,8 +30,6 @@ export default function TasksPage() {
 		inprogress: 'done',
 		done: 'todo',
 	};
-
-	const navigate = useNavigate();
 
 	const handleCreate = async ({ title, description, dueDate }) => {
 		try {
