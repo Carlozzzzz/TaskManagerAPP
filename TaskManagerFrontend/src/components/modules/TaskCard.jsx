@@ -8,7 +8,7 @@ const STATUS_STYLES = {
 
 export default function TaskCard({ task, onDelete, onUpdateStatus }) {
 	return (
-		<div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm" onClick={onUpdateStatus}>
+		<div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm" onClick={onUpdateStatus}>
 
 			<div className="flex items-start justify-between gap-2">
 				<h3 className="font-medium text-gray-800">{task.title}</h3>
@@ -18,16 +18,16 @@ export default function TaskCard({ task, onDelete, onUpdateStatus }) {
 			</div>
 
 			{task.description && (
-				<p className="text-sm text-gray-500 mt-1">{task.description}</p>
+				<p className="mt-1 text-sm text-gray-500">{task.description}</p>
 			)}
 
-			<div className="flex items-center justify-between mt-3">
+			<div className="mt-3 flex items-center justify-between">
 				<span className="text-xs text-gray-400">
 					Due: {new Date(task.dueDate).toLocaleDateString()}
 				</span>
 				<button
 					onClick={(e) => { e.stopPropagation(); onDelete(task.id); console.log('Delete'); }}
-					className="text-xs text-red-400 hover:text-red-600 transition-colors"
+					className="text-xs text-red-400 transition-colors hover:text-red-600"
 				>
 					Delete
 				</button>

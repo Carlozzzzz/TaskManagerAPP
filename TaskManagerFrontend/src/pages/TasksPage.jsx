@@ -6,6 +6,8 @@ import TaskCard from '../components/modules/TaskCard';
 import TaskForm from '../components/modules/TaskForm';
 import TaskFilter from '../components/modules/TaskFilter';
 import { useToast } from '../hooks/useToast';
+import { useConfirm } from '../hooks/useConfirm';
+import { useLoading } from '../hooks/useLoading';
 
 export default function TasksPage() {
 	const { tasks, loading, refetch } = useTasks();
@@ -13,6 +15,8 @@ export default function TasksPage() {
 	const [activeFilter, setActiveFilter] = useState('all');
 
 	const { showToast } = useToast();
+	const { showLoading, hideLoading } = useLoading();
+	const confirm = useConfirm();
 
 	const filteredTasks = activeFilter === 'all'
 		? tasks
@@ -33,6 +37,16 @@ export default function TasksPage() {
 
 	const handleCreate = async ({ title, description, dueDate }) => {
 		try {
+
+			const isOk = await confirm({
+				title: 'Create Task?',
+				message: 'Are you sure you want to proceed?'
+			});
+
+			if (!isOk) return;
+
+			showLoading();
+
 			setSubmitting(true);
 			await createTask(title, description, dueDate);
 			refetch();
@@ -43,11 +57,22 @@ export default function TasksPage() {
 			showToast('Failed to create task. Please try again.', 'error');
 		} finally {
 			setSubmitting(false);
+			hideLoading();
 		}
 	};
 
 	const handleUpdateStatus = async (id, currentStatus) => {
 		try {
+			const isOk = await confirm({
+				title: 'Update Task Status?',
+				type: 'success',
+				message: 'Are you sure you want to proceed?'
+			});
+
+			if (!isOk) return;
+
+			showLoading();
+
 			const newStatus = STATUS_CYCLE[currentStatus];
 			await updateTaskStatus(id, newStatus);
 			refetch();
@@ -56,16 +81,31 @@ export default function TasksPage() {
 		} catch (error) {
 			console.error(error);
 			showToast('Failed to update task status. Please try again.', 'error');
+		} finally {
+			hideLoading();
 		}
 	};
 
 	const handleDelete = async (id) => {
 		try {
+
+			const isOk = await confirm({
+				title: 'Delete Task?',
+				message: 'Are you sure you want to delete this? This action cannot be undone.'
+			});
+
+			if (!isOk) return;
+
+			showLoading();
+
 			await deleteTask(id);
 			refetch();
+			showToast('Successfully deleted!', 'success');
 		} catch (err) {
 			// MODIFIED — was console.error, now shows toast
 			showToast('Failed to delete task. Please try again.', 'error');
+		} finally {
+			hideLoading();
 		}
 	};
 
@@ -81,9 +121,9 @@ export default function TasksPage() {
 			<TaskForm onSubmit={handleCreate} loading={submitting} />
 
 			{loading ? (
-				<p className="text-center text-gray-400 text-sm">Loading tasks...</p>
+				<p className="text-center text-sm text-gray-400">Loading tasks...</p>
 			) : filteredTasks.length === 0 ? (
-				<p className="text-center text-gray-400 text-sm">No tasks yet. Add one above.</p>
+				<p className="text-center text-sm text-gray-400">No tasks yet. Add one above.</p>
 			) : (
 				<div className="flex flex-col gap-3">
 					{filteredTasks.map(task => (

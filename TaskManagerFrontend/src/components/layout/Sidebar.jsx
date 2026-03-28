@@ -11,12 +11,12 @@ export default function Sidebar() {
     }`;
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-full shadow-md">
+    <aside className="flex h-full w-64 flex-col border-r border-gray-200 bg-white shadow-md">
       <div className="p-6">
         <h1 className="text-xl font-bold text-blue-600">TaskManagerAPP</h1>
       </div>
 
-      <nav className="flex-1 px-4 space-y-2">
+      <nav className="flex-1 space-y-2 px-4">
         <NavLink to="/tasks" className={linkStyle}>
           <span>📋</span> My Tasks
         </NavLink>

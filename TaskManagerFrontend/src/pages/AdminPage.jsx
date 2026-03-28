@@ -42,7 +42,7 @@ export default function AdminPage() {
 	return (
 		<>
 			{/* Tabs */}
-			<div className="flex gap-2 mb-6">
+			<div className="mb-6 flex gap-2">
 				<button
 					onClick={() => setActiveTab('tasks')}
 					className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors
@@ -66,14 +66,14 @@ export default function AdminPage() {
 			</div>
 
 			{loading ? (
-				<p className="text-center text-gray-400 text-sm">Loading...</p>
+				<p className="text-center text-sm text-gray-400">Loading...</p>
 			) : activeTab === 'tasks' ? (
 
 				<div className="flex flex-col gap-3">
 					{tasks.length === 0 ? (
-						<p className="text-center text-gray-400 text-sm">No tasks found.</p>
+						<p className="text-center text-sm text-gray-400">No tasks found.</p>
 					) : tasks.map(task => (
-						<div key={task.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+						<div key={task.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 							<div className="flex items-start justify-between gap-2">
 								<h3 className="font-medium text-gray-800">{task.title}</h3>
 								<span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_STYLES[task.status] ?? STATUS_STYLES.todo}`}>
@@ -81,9 +81,9 @@ export default function AdminPage() {
 								</span>
 							</div>
 							{task.description && (
-								<p className="text-sm text-gray-500 mt-1">{task.description}</p>
+								<p className="mt-1 text-sm text-gray-500">{task.description}</p>
 							)}
-							<span className="text-xs text-gray-400 mt-2 block">
+							<span className="mt-2 block text-xs text-gray-400">
 								Due: {new Date(task.dueDate).toLocaleDateString()}
 							</span>
 						</div>
@@ -94,9 +94,9 @@ export default function AdminPage() {
 
 				<div className="flex flex-col gap-3">
 					{users.length === 0 ? (
-						<p className="text-center text-gray-400 text-sm">No users found.</p>
+						<p className="text-center text-sm text-gray-400">No users found.</p>
 					) : users.map(u => (
-						<div key={u.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex items-center justify-between">
+						<div key={u.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 							<div>
 								<p className="font-medium text-gray-800">{u.name}</p>
 								<p className="text-sm text-gray-500">{u.email}</p>

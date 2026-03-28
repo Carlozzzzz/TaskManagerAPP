@@ -21,7 +21,7 @@ export default function TaskFilter({ onFilterChange, activeFilter, taskCounts })
 						}`}
 				>
 					{taskCounts[f.value] > 0 && (
-						<span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-1">
+						<span className="absolute -right-2 -top-2 rounded-full bg-red-500 px-1 text-xs text-white">
 							{taskCounts[f.value]}
 						</span>
 					)}

@@ -6,7 +6,7 @@ const TYPE_STYLES = {
   error: {
     container: 'bg-red-50 border-red-200 text-red-700',
     icon: (
-      <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -15,7 +15,7 @@ const TYPE_STYLES = {
   success: {
     container: 'bg-green-50 border-green-200 text-green-700',
     icon: (
-      <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -24,7 +24,7 @@ const TYPE_STYLES = {
   info: {
     container: 'bg-blue-50 border-blue-200 text-blue-700',
     icon: (
-      <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
           d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
@@ -73,10 +73,10 @@ export default function Toast({ toast, onHide }) {
       {/* ADDED — dismiss button */}
       <button
         onClick={onHide}
-        className="ml-1 opacity-50 hover:opacity-100 transition-opacity shrink-0"
+        className="ml-1 shrink-0 opacity-50 transition-opacity hover:opacity-100"
         aria-label="Dismiss"
       >
-        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>

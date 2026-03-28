@@ -45,8 +45,8 @@ export default function TaskForm({ onSubmit, loading }) {
 		setFieldErrors(prev => ({ ...prev, [field]: undefined }));
 
 	return (
-		<form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-			<h2 className="font-medium text-gray-700 mb-3">Add New Task</h2>
+		<form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+			<h2 className="mb-3 font-medium text-gray-700">Add New Task</h2>
 
 			<div className="flex flex-col gap-3">
 
@@ -71,7 +71,7 @@ export default function TaskForm({ onSubmit, loading }) {
 					placeholder="Description (optional)"
 					value={description}
 					onChange={e => setDescription(e.target.value)}
-					className="border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+					className="rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
 				/>
 
 				{/* ADDED — due date field with inline error */}
@@ -92,7 +92,7 @@ export default function TaskForm({ onSubmit, loading }) {
 				<button
 					type="submit"
 					disabled={loading}
-					className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-md transition-colors"
+					className="rounded-md bg-blue-500 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
 				>
 					{loading ? 'Adding...' : 'Add Task'}
 				</button>

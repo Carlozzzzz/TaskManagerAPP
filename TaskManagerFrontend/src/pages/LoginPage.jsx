@@ -67,14 +67,14 @@ export default function LoginPage() {
 		setFieldErrors(prev => ({ ...prev, [field]: undefined }));
 
 	return (
-		<div className="min-h-screen bg-gray-50 flex items-center justify-center">
+		<div className="flex min-h-screen items-center justify-center bg-gray-50">
 
-			<div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 w-full max-w-sm">
+			<div className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
 
-				<h1 className="text-xl font-semibold text-gray-800 mb-1">
+				<h1 className="mb-1 text-xl font-semibold text-gray-800">
 					{isRegister ? 'Create account' : 'Welcome back'}
 				</h1>
-				<p className="text-sm text-gray-400 mb-6">
+				<p className="mb-6 text-sm text-gray-400">
 					{isRegister ? 'Sign up to get started' : 'Sign in to your account'}
 				</p>
 
@@ -129,13 +129,13 @@ export default function LoginPage() {
 					<button
 						type="submit"
 						disabled={loading}
-						className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-medium py-2 rounded-md transition-colors mt-1"
+						className="mt-1 rounded-md bg-blue-500 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
 					>
 						{loading ? 'Please wait...' : isRegister ? 'Create account' : 'Sign in'}
 					</button>
 				</form>
 
-				<p className="text-xs text-center text-gray-400 mt-4">
+				<p className="mt-4 text-center text-xs text-gray-400">
 					{isRegister ? 'Already have an account?' : "Don't have an account?"}
 					{' '}
 					<button

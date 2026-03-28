@@ -12,16 +12,19 @@ import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import TasksPage from './pages/TasksPage';
 import LoadingSpinner from './components/shared/LoadingSpinner';
+import { ConfirmProvider } from './context/ConfirmProvider';
 
 export default function App() {
 	return (
 		<BrowserRouter>
 			<LoadingProvider>
 				<ToastProvider>
-					<AuthProvider>
-						<LoadingSpinner />
-						<AppContent />
-					</AuthProvider>
+					<ConfirmProvider>
+						<AuthProvider>
+							<LoadingSpinner />
+							<AppContent />
+						</AuthProvider>
+					</ConfirmProvider>
 				</ToastProvider>
 			</LoadingProvider>
 		</BrowserRouter>
