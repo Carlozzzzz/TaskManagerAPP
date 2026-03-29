@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '../hooks/useToast';
 import { AuthContext } from './AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
 
 
 export function AuthProvider({ children }) {
@@ -10,6 +11,7 @@ export function AuthProvider({ children }) {
 	const [loading, setLoading] = useState(true);
 
 	const { showToast } = useToast();
+	const { askConfirm } = useConfirm();
 
 	// ADDED — on app load, check if token already exists in localStorage
 	useEffect(() => {
@@ -32,7 +34,16 @@ export function AuthProvider({ children }) {
 		showToast(`Welcome back, ${data.name}!`, 'success');
 	};
 
-	const logout = () => {
+	const logout = async () => {
+
+		const isOk = await askConfirm({
+			title: 'Are you sure?',
+			message: 'Do you really want to log out?',
+			type: 'warning'
+		});
+		
+		if (!isOk) return;
+
 		localStorage.removeItem('token');
 		localStorage.removeItem('user');
 		setToken(null);

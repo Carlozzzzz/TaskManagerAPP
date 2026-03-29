@@ -1,5 +1,5 @@
 // src/pages/TasksPage.jsx
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTasks } from '../hooks/useTasks';
 import { createTask, deleteTask, updateTaskStatus } from '../services/taskService';
 import TaskCard from '../components/modules/TaskCard';
@@ -16,18 +16,20 @@ export default function TasksPage() {
 
 	const { showToast } = useToast();
 	const { showLoading, hideLoading } = useLoading();
-	const confirm = useConfirm();
+	const { askConfirm } = useConfirm();
 
-	const filteredTasks = activeFilter === 'all'
-		? tasks
-		: tasks.filter(t => t.status === activeFilter);
-
-	const taskCounts = {
+	const filteredTasks = useMemo(() =>
+		activeFilter === 'all'
+			? tasks
+			: tasks.filter(t => t.status === activeFilter),
+		[tasks, activeFilter]);
+		
+	const taskCounts = useMemo(() => ({
 		all: tasks.length,
 		todo: tasks.filter(t => t.status === 'todo').length,
 		inprogress: tasks.filter(t => t.status === 'inprogress').length,
 		done: tasks.filter(t => t.status === 'done').length,
-	};
+	}), [tasks]);
 
 	const STATUS_CYCLE = {
 		todo: 'inprogress',
@@ -38,7 +40,7 @@ export default function TasksPage() {
 	const handleCreate = async ({ title, description, dueDate }) => {
 		try {
 
-			const isOk = await confirm({
+			const isOk = await askConfirm({
 				title: 'Create Task?',
 				message: 'Are you sure you want to proceed?'
 			});
@@ -63,9 +65,8 @@ export default function TasksPage() {
 
 	const handleUpdateStatus = async (id, currentStatus) => {
 		try {
-			const isOk = await confirm({
+			const isOk = await askConfirm({
 				title: 'Update Task Status?',
-				type: 'success',
 				message: 'Are you sure you want to proceed?'
 			});
 
@@ -89,8 +90,9 @@ export default function TasksPage() {
 	const handleDelete = async (id) => {
 		try {
 
-			const isOk = await confirm({
+			const isOk = await askConfirm({
 				title: 'Delete Task?',
+				type: 'delete',
 				message: 'Are you sure you want to delete this? This action cannot be undone.'
 			});
 

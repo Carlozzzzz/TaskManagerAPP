@@ -26,7 +26,7 @@ export default function TaskCard({ task, onDelete, onUpdateStatus }) {
 					Due: {new Date(task.dueDate).toLocaleDateString()}
 				</span>
 				<button
-					onClick={(e) => { e.stopPropagation(); onDelete(task.id); console.log('Delete'); }}
+					onClick={(e) => { e.stopPropagation(); onDelete(task.id);}}
 					className="text-xs text-red-400 transition-colors hover:text-red-600"
 				>
 					Delete
