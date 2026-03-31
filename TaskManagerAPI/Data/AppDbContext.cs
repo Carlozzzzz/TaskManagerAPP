@@ -16,25 +16,10 @@ namespace TaskManagerAPI.Data
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			// ADDED — configure the TaskItem table explicitly
-			modelBuilder.Entity<TaskItem>(entity =>
-			{
-				entity.HasKey(t => t.Id);
+			base.OnModelCreating(modelBuilder);
 
-				entity.Property(t => t.Title)
-									.IsRequired()
-									.HasMaxLength(200);
-
-				entity.Property(t => t.Description)
-									.HasMaxLength(1000);
-
-				entity.Property(t => t.Status)
-									.IsRequired()
-									.HasDefaultValue("todo");
-
-				entity.Property(t => t.CreatedAt)
-									.HasDefaultValueSql("GETUTCDATE()"); // SQL Server sets this automatically
-			});
+			// This magic line scans your project for all "Configuration" files
+			modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 		}
 	}
 }
