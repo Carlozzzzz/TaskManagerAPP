@@ -18,9 +18,19 @@ namespace TaskManagerAPI.Services
 
 		public async Task<List<UserDto>> GetAllUsersAsync()
 		{
+			// SENIOR TIP: Use .Include() to fetch roles in ONE query (Avoids N+1 problem)
 			return await _context.Users
 					.AsNoTracking()
-					.Select(u => MapToDto(u))
+					.Include(u => u.UserRoles)
+							.ThenInclude(ur => ur.Role)
+					.Select(u => new UserDto
+					{
+						Id = u.Id,
+						Name = u.Name,
+						Email = u.Email,
+						// MODIFIED: Extract the names of all assigned roles
+						Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+					})
 					.ToListAsync();
 		}
 
@@ -28,17 +38,19 @@ namespace TaskManagerAPI.Services
 		{
 			var user = await _context.Users
 					.AsNoTracking()
+					.Include(u => u.UserRoles)
+							.ThenInclude(ur => ur.Role)
 					.FirstOrDefaultAsync(u => u.Id == id);
 
-			return user == null ? null : MapToDto(user);
-		}
+			if (user == null) return null;
 
-		private static UserDto MapToDto(Models.User u) => new UserDto
-		{
-			Id = u.Id,
-			Name = u.Name,
-			Email = u.Email,
-			Role = u.Role
-		};
+			return new UserDto
+			{
+				Id = user.Id,
+				Name = user.Name,
+				Email = user.Email,
+				Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList()
+			};
+		}
 	}
 }

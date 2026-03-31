@@ -17,7 +17,16 @@ namespace TaskManagerAPI.DTOs
 	{
 		public string Token { get; set; } = string.Empty;
 		public string Name { get; set; } = string.Empty;
-		public string Role { get; set; } = string.Empty;
+		public List<string> Roles { get; set; } = new(); // MODIFIED: Support multiple
+		public List<PermissionDto> Permissions { get; set; } = new(); // ADDED
 	}
 
+	public class PermissionDto
+	{
+		public string ModuleKey { get; set; } = string.Empty;
+		public bool CanView { get; set; }
+		public bool CanAdd { get; set; }
+		public bool CanEdit { get; set; }
+		public bool CanDelete { get; set; }
+	}
 }

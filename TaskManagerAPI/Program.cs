@@ -30,6 +30,10 @@ builder.Services.AddCors(options =>
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+		
+// ADDED: Allow services to access the current web request (Required for CurrentUserService)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Dependency Injection: Services
 builder.Services.AddScoped<ITaskService, TaskService>();

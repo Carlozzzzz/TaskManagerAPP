@@ -30,60 +30,90 @@ namespace TaskManagerAPI.Services
 
 		public async Task<AuthResponseDto?> RegisterAsync(RegisterDto dto)
 		{
-			// Use AnyAsync for better performance
 			if (await _context.Users.AnyAsync(u => u.Email == dto.Email)) return null;
-
-			// First user is Admin logic
-			var isFirstUser = !await _context.Users.AnyAsync();
-			var role = isFirstUser ? UserRoles.Admin : UserRoles.User;
 
 			var user = new User
 			{
 				Name = dto.Name,
 				Email = dto.Email,
-				PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-				Role = role
+				PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
 			};
+
+			// NEW: Assign Role based on DB lookup
+			var isFirstUser = !await _context.Users.IgnoreQueryFilters().AnyAsync();
+			var roleName = isFirstUser ? "Admin" : "User";
+			var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+
+			if (role != null)
+			{
+				user.UserRoles.Add(new UserRole { RoleId = role.Id });
+			}
 
 			_context.Users.Add(user);
 			await _context.SaveChangesAsync();
-			return GenerateToken(user);
+
+			return await LoginAsync(new LoginDto { Email = dto.Email, Password = dto.Password });
 		}
 
 		public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
 		{
-			var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+			var user = await _context.Users
+					.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+							.ThenInclude(r => r.Permissions).ThenInclude(p => p.Module)
+					.FirstOrDefaultAsync(u => u.Email == dto.Email);
+
 			if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
 				return null;
 
-			return GenerateToken(user);
+			var permissions = ResolvePermissions(user);
+			var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+
+			return new AuthResponseDto
+			{
+				Token = GenerateToken(user, roles),
+				Name = user.Name,
+				Roles = roles,
+				Permissions = permissions
+			};
 		}
 
-		private AuthResponseDto GenerateToken(User user)
+		// THE FLATTENER: Squashes multiple roles into additive permissions
+		private List<PermissionDto> ResolvePermissions(User user)
+		{
+			return user.UserRoles
+					.SelectMany(ur => ur.Role.Permissions)
+					.GroupBy(p => p.Module.Key)
+					.Select(g => new PermissionDto
+					{
+						ModuleKey = g.Key,
+						CanAdd = g.Any(x => x.CanAdd),
+						CanEdit = g.Any(x => x.CanEdit),
+						CanDelete = g.Any(x => x.CanDelete),
+						// Implicit View Rule: If they can do anything, they can view.
+						CanView = g.Any(x => x.CanView || x.CanAdd || x.CanEdit || x.CanDelete)
+					}).ToList();
+		}
+
+		private string GenerateToken(User user, List<string> roles)
 		{
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-			var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+			var claims = new List<Claim> {
+						new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+						new Claim(ClaimTypes.Name, user.Name)
+				};
 
-			var claims = new[] {
-								new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-								new Claim(ClaimTypes.Name, user.Name),
-								new Claim(ClaimTypes.Role, user.Role),
-						};
+			// ADDED: Add multiple role claims
+			roles.ForEach(r => claims.Add(new Claim(ClaimTypes.Role, r)));
 
 			var token = new JwtSecurityToken(
 					issuer: _config["Jwt:Issuer"],
 					audience: _config["Jwt:Audience"],
-					expires: DateTime.UtcNow.AddMinutes(int.Parse(_config["Jwt:ExpiryMinutes"]!)),
 					claims: claims,
-					signingCredentials: creds
+					expires: DateTime.UtcNow.AddMinutes(60),
+					signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
 			);
 
-			return new AuthResponseDto
-			{
-				Token = new JwtSecurityTokenHandler().WriteToken(token),
-				Name = user.Name,
-				Role = user.Role
-			};
+			return new JwtSecurityTokenHandler().WriteToken(token);
 		}
 	}
 }

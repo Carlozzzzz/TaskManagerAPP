@@ -16,8 +16,6 @@ namespace TaskManagerAPI.Data.Configurations
 			// CRITICAL: Database level unique index for emails
 			builder.Property(u => u.Email).IsRequired().HasMaxLength(255);
 			builder.HasIndex(u => u.Email).IsUnique();
-
-			builder.Property(u => u.Role).IsRequired().HasDefaultValue("user");
 		}
 	}
 }
