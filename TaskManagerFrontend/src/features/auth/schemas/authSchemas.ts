@@ -1,0 +1,52 @@
+// src/features/auth/schemas/authSchemas.ts
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Email must be valid'),
+  password: z
+    .string()
+    .min(1, 'Password is required')
+    .min(6, 'Password must be at least 6 characters'),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const registerSchema = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .min(2, 'Name must be at least 2 characters'),
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Email must be valid'),
+  password: z
+    .string()
+    .min(1, 'Password is required')
+    .min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const createTaskSchema = z.object({
+  title: z
+    .string()
+    .min(2, 'Title must be at least 2 characters')
+    .max(50, 'Title cannot exceed 50 characters'),
+  description: z
+    .string()
+    .max(200, 'Description cannot exceed 200 characters')
+    .optional(),
+  dueDate: z
+    .string()
+    .refine((date) => new Date(date) > new Date(), 'Due date cannot be in the past'),
+});
+
+export type CreateTaskInput = z.infer<typeof createTaskSchema>;
