@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Services;
+using TaskManagerAPI.API.Extensions;
 using System.Security.Claims;
 
 namespace TaskManagerAPI.Controllers
@@ -39,6 +40,9 @@ namespace TaskManagerAPI.Controllers
 		[HttpPost]
 		public async Task<ActionResult<TaskDto>> Create([FromBody] CreateTaskDto dto)
 		{
+			// ADDED: Validate DTO (Phase 2B)
+			await dto.ValidateCreateTaskAsync();
+
 			var created = await _taskService.CreateTaskAsync(dto, GetUserId());
 			if (created == null) return BadRequest("Invalid Task Data or Past Due Date");
 
@@ -49,6 +53,9 @@ namespace TaskManagerAPI.Controllers
 		[HttpPut("update-status/{id}")]
 		public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateTaskStatusDto dto)
 		{
+			// ADDED: Validate DTO (Phase 2B)
+			await dto.ValidateUpdateTaskStatusAsync();
+
 			var updated = await _taskService.UpdateStatusAsync(dto, id, GetUserId());
 			if (updated == null) return NotFound();
 			return Ok(updated);

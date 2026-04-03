@@ -1,8 +1,7 @@
 // Services/TaskService.cs
-using Microsoft.EntityFrameworkCore;
-using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Models;
+using TaskManagerAPI.Infrastructure.Data.Repositories;
 
 namespace TaskManagerAPI.Services
 {
@@ -20,34 +19,26 @@ namespace TaskManagerAPI.Services
 
 	public class TaskService : ITaskService
 	{
-		private readonly AppDbContext _context;
-		public TaskService(AppDbContext context) => _context = context;
+		private readonly ITaskRepository _repository;
+
+		public TaskService(ITaskRepository repository) => _repository = repository;
 
 		public async Task<List<TaskDto>> GetAllTasksAsync(int userId)
 		{
-			return await _context.Tasks
-					.AsNoTracking() // Performance boost for read-only queries
-					.Where(t => t.UserId == userId)
-					.Select(t => MapToDto(t))
-					.ToListAsync();
+			var tasks = await _repository.GetUserTasksAsync(userId);
+			return tasks.Select(MapToDto).ToList();
 		}
 
 		public async Task<TaskDto?> GetTaskByIdAsync(int id, int userId)
 		{
-			var task = await _context.Tasks
-					.AsNoTracking()
-					.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
-
+			var task = await _repository.GetSingleAsync(t => t.Id == id && t.UserId == userId);
 			return task == null ? null : MapToDto(task);
 		}
 
 		public async Task<List<TaskDto>> GetAllTaskForAdminAsync()
 		{
-			// Use ToListAsync() for non-blocking database read
-			return await _context.Tasks
-					.AsNoTracking() // Performance boost for large admin lists
-					.Select(t => MapToDto(t))
-					.ToListAsync();
+			var tasks = await _repository.GetAllAsync();
+			return tasks.Select(MapToDto).ToList();
 		}
 
 		public async Task<TaskDto?> CreateTaskAsync(CreateTaskDto dto, int userId)
@@ -63,29 +54,30 @@ namespace TaskManagerAPI.Services
 				UserId = userId
 			};
 
-			_context.Tasks.Add(newTask);
-			await _context.SaveChangesAsync(); // Non-blocking write
+			await _repository.AddAsync(newTask);
+			await _repository.SaveChangesAsync();
 
 			return MapToDto(newTask);
 		}
 
 		public async Task<bool> DeleteDataAsync(int id, int userId)
 		{
-			var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+			var task = await _repository.GetSingleAsync(t => t.Id == id && t.UserId == userId);
 			if (task == null) return false;
 
-			_context.Tasks.Remove(task);
-			await _context.SaveChangesAsync();
+			_repository.Delete(task);
+			await _repository.SaveChangesAsync();
 			return true;
 		}
 
 		public async Task<TaskDto?> UpdateStatusAsync(UpdateTaskStatusDto dto, int id, int userId)
 		{
-			var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+			var task = await _repository.GetSingleAsync(t => t.Id == id && t.UserId == userId);
 			if (task == null) return null;
 
 			task.Status = dto.Status;
-			await _context.SaveChangesAsync();
+			_repository.Update(task);
+			await _repository.SaveChangesAsync();
 
 			return MapToDto(task);
 		}

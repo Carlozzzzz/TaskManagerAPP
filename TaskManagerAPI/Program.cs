@@ -8,6 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.Services;
+using TaskManagerAPI.Core.Interfaces;
+using TaskManagerAPI.Infrastructure.Data.Repositories;
+using FluentValidation;
+using TaskManagerAPI.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +38,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // ADDED: Allow services to access the current web request (Required for CurrentUserService)
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// ADDED: Repository Pattern (NEW - Phase 2A)
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
+
+// ADDED: FluentValidation (NEW - Phase 2B)
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Dependency Injection: Services
 builder.Services.AddScoped<ITaskService, TaskService>();
@@ -119,6 +131,9 @@ app.UseExceptionHandler(errorApp =>
 		}
 	});
 });
+
+// ADDED: Validation Middleware (NEW - Phase 2B)
+app.UseMiddleware<ValidationMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

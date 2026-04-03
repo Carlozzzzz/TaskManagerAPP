@@ -8,6 +8,7 @@ using TaskManagerAPI.Constants;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Models;
+using TaskManagerAPI.Infrastructure.Data.Repositories;
 
 namespace TaskManagerAPI.Services
 {
@@ -20,17 +21,20 @@ namespace TaskManagerAPI.Services
 	public class AuthService : IAuthService
 	{
 		private readonly AppDbContext _context;
+		private readonly IUserRepository _userRepository;
 		private readonly IConfiguration _config;
 
-		public AuthService(AppDbContext context, IConfiguration config)
+		public AuthService(AppDbContext context, IUserRepository userRepository, IConfiguration config)
 		{
 			_context = context;
+			_userRepository = userRepository;
 			_config = config;
 		}
 
 		public async Task<AuthResponseDto?> RegisterAsync(RegisterDto dto)
 		{
-			if (await _context.Users.AnyAsync(u => u.Email == dto.Email)) return null;
+			var existingUser = await _userRepository.GetUserByEmailAsync(dto.Email);
+			if (existingUser != null) return null;
 
 			var user = new User
 			{
@@ -49,8 +53,8 @@ namespace TaskManagerAPI.Services
 				user.UserRoles.Add(new UserRole { RoleId = role.Id });
 			}
 
-			_context.Users.Add(user);
-			await _context.SaveChangesAsync();
+			await _userRepository.AddAsync(user);
+			await _userRepository.SaveChangesAsync();
 
 			return await LoginAsync(new LoginDto { Email = dto.Email, Password = dto.Password });
 		}
