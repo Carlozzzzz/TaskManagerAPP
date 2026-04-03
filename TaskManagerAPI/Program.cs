@@ -1,107 +1,138 @@
 // Program.cs
 using System.Text;
+using System.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.Services;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ADDED — allow requests from React frontend
+// --- 1. SERVICES CONFIGURATION ---
+
+// MODIFIED — CORS: Added support for reading from Configuration (Production-Ready)
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+										 ?? new[] { "http://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
 	options.AddPolicy("AllowFrontend", policy =>
 	{
-		policy.WithOrigins("http://localhost:5173") // your Vite dev server
+		policy.WithOrigins(allowedOrigins)
 						.AllowAnyHeader()
 						.AllowAnyMethod();
 	});
 });
 
+// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+		
+// ADDED: Allow services to access the current web request (Required for CurrentUserService)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-
-// ADDED — register TaskService so it can be injected into controllers
+// Dependency Injection: Services
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-// ADDED - register AuthService
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 
-// ADDED — Swagger setup
+// Swagger: Professional JWT Setup
 builder.Services.AddEndpointsApiExplorer();
-// MODIFIED — add JWT support to Swagger UI
 builder.Services.AddSwaggerGen(c =>
 {
-	c.SwaggerDoc("v1", new()
+	c.SwaggerDoc("v1", new OpenApiInfo
 	{
 		Title = "Task Manager API",
 		Version = "v1",
-		Description = "Learning project — Stage 3 Auth"
+		Description = "Enterprise Template — Stage 4 Professional Async"
 	});
 
-	// ADDED — tell Swagger about the Bearer token
-	c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
 		Name = "Authorization",
-		Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+		Type = SecuritySchemeType.Http,
 		Scheme = "Bearer",
 		BearerFormat = "JWT",
-		In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-		Description = "Paste your JWT token here. Example: eyJhbGci..."
+		In = ParameterLocation.Header,
+		Description = "Paste your JWT token here."
 	});
 
-	c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+	c.AddSecurityRequirement(new OpenApiSecurityRequirement
 		{
 				{
-						new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+						new OpenApiSecurityScheme
 						{
-								Reference = new Microsoft.OpenApi.Models.OpenApiReference
-								{
-										Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-										Id   = "Bearer"
-								}
+								Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
 						},
 						Array.Empty<string>()
 				}
 		});
 });
 
+// Authentication & JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-	.AddJwtBearer(options =>
-	{
-		options.TokenValidationParameters = new TokenValidationParameters
+		.AddJwtBearer(options =>
 		{
-			ValidateIssuer = true,
-			ValidateAudience = true,
-			ValidateLifetime = true,
-			ValidateIssuerSigningKey = true,
-			ValidIssuer = builder.Configuration["Jwt:Issuer"],
-			ValidAudience = builder.Configuration["Jwt:Audience"],
-			IssuerSigningKey = new SymmetricSecurityKey(
-															Encoding.UTF8.GetBytes(
-																builder.Configuration["Jwt:Key"]!))
-		};
-	});
+			options.TokenValidationParameters = new TokenValidationParameters
+			{
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidateLifetime = true,
+				ValidateIssuerSigningKey = true,
+				ValidIssuer = builder.Configuration["Jwt:Issuer"],
+				ValidAudience = builder.Configuration["Jwt:Audience"],
+				IssuerSigningKey = new SymmetricSecurityKey(
+							Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+			};
+		});
 
 var app = builder.Build();
 
-// ADDED — enable Swagger UI in development
+// --- 2. MIDDLEWARE PIPELINE ---
+
+// ADDED — Global Exception Handler (Enterprise Standard)
+// This catches any crash in your app and returns a clean JSON error to the Frontend.
+app.UseExceptionHandler(errorApp =>
+{
+	errorApp.Run(async context =>
+	{
+		context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+		context.Response.ContentType = "application/json";
+
+		var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+		if (contextFeature != null)
+		{
+			// In a real app, you would use a Logger here (e.g., Serilog)
+			var errorResponse = new
+			{
+				StatusCode = context.Response.StatusCode,
+				Message = "An unexpected error occurred. Please try again later.",
+				Details = app.Environment.IsDevelopment() ? contextFeature.Error.Message : null
+			};
+			await context.Response.WriteAsJsonAsync(errorResponse);
+		}
+	});
+});
+
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
 	app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Task Manager API v1"));
 }
 
+app.UseHttpsRedirection();
+
+// Order is critical here: CORS -> Auth -> Authorization
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
-app.UseHttpsRedirection();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

@@ -13,6 +13,7 @@ import AdminPage from './pages/AdminPage';
 import TasksPage from './pages/TasksPage';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import { ConfirmProvider } from './context/ConfirmProvider';
+import { AxiosInterceptor } from './components/layout/AxiosInterceptor';
 
 export default function App() {
 	return (
@@ -22,7 +23,9 @@ export default function App() {
 					<ConfirmProvider>
 						<AuthProvider>
 							<LoadingSpinner />
-							<AppContent />
+							<AxiosInterceptor>
+								<AppContent />
+							</AxiosInterceptor>
 						</AuthProvider>
 					</ConfirmProvider>
 				</ToastProvider>
