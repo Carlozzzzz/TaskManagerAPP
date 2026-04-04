@@ -1,5 +1,13 @@
-// src/components/shared/Toast.jsx
+// src/components/shared/Toast.tsx
 import { useEffect, useState } from 'react';
+
+interface ToastProps {
+	toast: {
+		message: string;
+		type: 'success' | 'error' | 'info' | 'warning';
+	} | null;
+	onHide: () => void;
+}
 
 // ADDED — type config: color + icon per type
 const TYPE_STYLES = {
@@ -30,9 +38,18 @@ const TYPE_STYLES = {
       </svg>
     ),
   },
+  warning: {
+    container: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+    icon: (
+      <svg className="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M12 9v2m0 4v2m0 0v2m0-6L6 5m12 0l-6 6" />
+      </svg>
+    ),
+  },
 };
 
-export default function Toast({ toast, onHide }) {
+export default function Toast({ toast, onHide }: ToastProps) {
   // ADDED — visible controls the fade-in/out animation
   const [visible, setVisible] = useState(false);
 
@@ -55,7 +72,7 @@ export default function Toast({ toast, onHide }) {
     // ADDED — fixed position: bottom-right corner, above everything
     <div
       className={`
-        fixed top-6 right-6 z-toast
+        fixed top-6 right-6 z-[9999]
         flex items-start gap-2
         border rounded-lg px-4 py-3 shadow-md
         text-sm max-w-sm w-full

@@ -43,14 +43,18 @@ namespace TaskManagerAPI.Services
 
 		public async Task<TaskDto?> CreateTaskAsync(CreateTaskDto dto, int userId)
 		{
-			if (dto.DueDate < DateTime.UtcNow) return null;
+			// Parse the dueDate string to DateTime
+			if (!DateTime.TryParse(dto.DueDate, out var parsedDueDate))
+				return null;
+
+			if (parsedDueDate < DateTime.UtcNow) return null;
 
 			var newTask = new TaskItem
 			{
 				Title = dto.Title,
 				Description = dto.Description,
 				Status = "todo",
-				DueDate = dto.DueDate,
+				DueDate = parsedDueDate,
 				UserId = userId
 			};
 

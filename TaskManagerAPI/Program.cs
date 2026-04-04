@@ -39,7 +39,8 @@ builder.Services.AddCors(options =>
 	{
 		policy.WithOrigins(allowedOrigins)
 						.AllowAnyHeader()
-						.AllowAnyMethod();
+						.AllowAnyMethod()
+						.AllowCredentials();
 	});
 });
 
@@ -144,9 +145,6 @@ app.UseExceptionHandler(errorApp =>
 	});
 });
 
-// ADDED: Validation Middleware (NEW - Phase 2B)
-app.UseMiddleware<ValidationMiddleware>();
-
 // ADDED: Serilog HTTP Request Logging (Phase 2C)
 app.UseSerilogRequestLogging();
 
@@ -158,10 +156,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Order is critical here: CORS -> Auth -> Authorization
+// Order is critical here: CORS -> Auth -> Authorization -> Validation
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// ADDED: Validation Middleware (NEW - Phase 2B) - Must be AFTER Auth/CORS
+app.UseMiddleware<ValidationMiddleware>();
 
 app.MapControllers();
 

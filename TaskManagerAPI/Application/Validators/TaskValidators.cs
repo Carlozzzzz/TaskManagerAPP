@@ -21,7 +21,14 @@ namespace TaskManagerAPI.Application.Validators
 
             RuleFor(x => x.DueDate)
                 .NotEmpty().WithMessage("Due date is required")
-                .GreaterThan(DateTime.UtcNow).WithMessage("Due date cannot be in the past");
+                .Must(BeValidFutureDate).WithMessage("Due date cannot be in the past or invalid format");
+        }
+
+        private bool BeValidFutureDate(string dueDate)
+        {
+            if (!DateTime.TryParse(dueDate, out var parsedDate))
+                return false;
+            return parsedDate > DateTime.UtcNow;
         }
     }
 

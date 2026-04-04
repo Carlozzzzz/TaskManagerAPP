@@ -23,8 +23,8 @@ namespace TaskManagerAPI.Controllers
 		[HttpPost("register")]
 		public async Task<IActionResult> Register([FromBody] RegisterDto dto)
 		{
-			// ADDED: Validate DTO (Phase 2B)
-			await dto.ValidateRegisterAsync();
+		// ADDED: Validate DTO (Phase 2B)
+		await dto.ValidateRegisterAsync();
 
 			var result = await _authService.RegisterAsync(dto);
 			return result == null ? Conflict("Email already exists") : Ok(result);
@@ -33,8 +33,8 @@ namespace TaskManagerAPI.Controllers
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginDto dto)
 		{
-			// ADDED: Validate DTO (Phase 2B)
-			await dto.ValidateLoginAsync();
+		// ADDED: Validate DTO (Phase 2B)
+		await dto.ValidateLoginAsync();
 
 			var result = await _authService.LoginAsync(dto);
 			return result == null ? Unauthorized("Invalid credentials") : Ok(result);

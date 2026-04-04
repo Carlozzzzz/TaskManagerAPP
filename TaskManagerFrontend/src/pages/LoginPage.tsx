@@ -4,12 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../hooks/useAuth';
-import { login, register } from '../services/authService';
 import { useToast } from '../hooks/useToast';
 import { loginSchema, registerSchema, type LoginInput, type RegisterInput } from '../schemas/authSchemas';
 
 export default function LoginPage() {
-	const { login: setAuth } = useAuth();
+	const { login: authLogin, register: authRegister } = useAuth();
 	const navigate = useNavigate();
 	const { showToast } = useToast();
 
@@ -36,11 +35,9 @@ export default function LoginPage() {
 
 		try {
 			if (isRegister && 'name' in data) {
-				const response = await register(data.name, data.email, data.password);
-				setAuth(response);
+				await authRegister(data.name, data.email, data.password);
 			} else if (!isRegister && !('name' in data)) {
-				const response = await login(data.email, data.password);
-				setAuth(response);
+				await authLogin(data.email, data.password);
 			}
 			navigate('/tasks');
 		} catch (err: any) {

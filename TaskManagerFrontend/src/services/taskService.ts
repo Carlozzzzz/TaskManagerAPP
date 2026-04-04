@@ -12,8 +12,12 @@ export const getTaskById = async (id: number): Promise<Task> => {
   return response.data;
 };
 
-export const createTask = async (task: Omit<Task, 'id'>): Promise<Task> => {
-  const response = await apiClient.post('/tasks', task);
+export const createTask = async (
+  title: string,
+  description: string,
+  dueDate: string
+): Promise<Task> => {
+  const response = await apiClient.post('/tasks', { title, description, dueDate });
   return response.data;
 };
 

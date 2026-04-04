@@ -27,13 +27,13 @@ export default function TasksPage() {
 	const taskCounts = useMemo(() => ({
 		all: tasks.length,
 		todo: tasks.filter(t => t.status === 'todo').length,
-		inprogress: tasks.filter(t => t.status === 'inprogress').length,
+		inprogress: tasks.filter(t => t.status === 'in-progress').length,
 		done: tasks.filter(t => t.status === 'done').length,
 	}), [tasks]);
 
 	const STATUS_CYCLE = {
-		todo: 'inprogress',
-		inprogress: 'done',
+		todo: 'in-progress',
+		'in-progress': 'done',
 		done: 'todo',
 	};
 

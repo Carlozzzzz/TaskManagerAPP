@@ -1,0 +1,20 @@
+{
+	"appId": "com.taskmanager.app",
+	"appName": "TaskManager",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	},
+	"plugins": {
+		"Keyboard": {
+			"resize": "body"
+		},
+		"Preferences": {
+			"group": "com.taskmanager.app"
+		}
+	},
+	"packageClassList": [
+		"KeyboardPlugin",
+		"PreferencesPlugin"
+	]
+}

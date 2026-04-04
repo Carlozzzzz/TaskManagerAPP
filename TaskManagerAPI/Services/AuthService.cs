@@ -4,10 +4,10 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using TaskManagerAPI.Constants;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Models;
+using TaskManagerAPI.Core.Interfaces;
 using TaskManagerAPI.Infrastructure.Data.Repositories;
 
 namespace TaskManagerAPI.Services

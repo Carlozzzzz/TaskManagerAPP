@@ -1,5 +1,6 @@
-// src/components/layout/Topbar.jsx
+// src/components/layout/Topbar.tsx
 import { useAuth } from '../../hooks/useAuth';
+import { useConfirm } from '../../hooks/useConfirm';
 import { useLayout } from '../../context/LayoutContext';
 import {
 	MenuRounded,
@@ -10,7 +11,19 @@ import {
 
 export default function Topbar() {
 	const { user, logout } = useAuth();
+	const { askConfirm } = useConfirm();
 	const { toggleMobile } = useLayout(); // MODIFIED: Use shared layout state
+
+	const handleLogout = async () => {
+		const confirmed = await askConfirm({
+			title: 'Logout',
+			message: 'Are you sure you want to logout?',
+			type: 'warning'
+		});
+		if (confirmed) {
+			logout();
+		}
+	}
 
 	return (
 		<header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white/80 px-4 backdrop-blur-md md:px-8">
@@ -67,7 +80,7 @@ export default function Topbar() {
 
 					{/* Logout Button */}
 					<button
-						onClick={() => logout({ forced: false })}
+						onClick={handleLogout}
 						title="Logout"
 						className="flex items-center gap-2 rounded-lg p-2 text-gray-500 transition-all duration-200 hover:bg-red-50 hover:text-red-600 md:px-3 md:py-2"
 					>

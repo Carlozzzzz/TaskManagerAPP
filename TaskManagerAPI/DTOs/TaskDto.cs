@@ -18,14 +18,14 @@ namespace TaskManagerAPI.DTOs
 		[Required]
 		[StringLength(50, MinimumLength = 2)]
 		public string Title { get; set; } = string.Empty;
-		
-		[StringLength(200, MinimumLength = 3)]
+
+		[StringLength(200, MinimumLength = 0)]
 		public string Description { get; set; } = string.Empty;
-		
+
 		[Required]
-		public DateTime DueDate { get; set; }
+		public string DueDate { get; set; } = string.Empty; // CHANGED: Accept string from HTML date input
 	}
-	
+
 	public class UpdateTaskStatusDto
 	{
 		public int Id { get; set; }

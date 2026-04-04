@@ -1,7 +1,18 @@
-// src/components/shared/Confirm.jsx
+// src/components/shared/Confirm.tsx
 import ReactDOM from 'react-dom';
 
-export function ConfirmModal({ config, onResolve }) {
+interface ConfirmConfig {
+	title?: string;
+	message?: string;
+	type?: 'success' | 'delete' | 'error' | 'danger' | 'warning' | 'info' | 'save' | 'default';
+}
+
+interface ConfirmModalProps {
+	config: ConfirmConfig;
+	onResolve: (result: boolean) => void;
+}
+
+export function ConfirmModal({ config, onResolve }: ConfirmModalProps) {
 	const colorFinder = () => {
 		switch (config.type) {
 			case 'success':
@@ -20,11 +31,11 @@ export function ConfirmModal({ config, onResolve }) {
 			default:
 				return 'bg-blue-500 hover:bg-blue-600';
 		}
-		
+
 	}
-	
+
 	const colorClasses = colorFinder();
-	
+
 	return ReactDOM.createPortal(
 		<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"> {/* FIXED: itesm-center & z-index */}
 			{/* Backdrop - Now a SIBLING, not a parent of the card */}
