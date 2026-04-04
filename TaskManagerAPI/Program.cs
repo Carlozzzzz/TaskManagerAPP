@@ -12,8 +12,19 @@ using TaskManagerAPI.Core.Interfaces;
 using TaskManagerAPI.Infrastructure.Data.Repositories;
 using FluentValidation;
 using TaskManagerAPI.API.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// --- ADDED: Serilog Configuration (Phase 2C) ---
+Log.Logger = new LoggerConfiguration()
+	.MinimumLevel.Information()
+	.WriteTo.Console()
+	.WriteTo.File("logs/app-.txt", rollingInterval: RollingInterval.Day)
+	.CreateLogger();
+
+builder.Host.UseSerilog();
+// ---
 
 // --- 1. SERVICES CONFIGURATION ---
 
@@ -120,7 +131,9 @@ app.UseExceptionHandler(errorApp =>
 		var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
 		if (contextFeature != null)
 		{
-			// In a real app, you would use a Logger here (e.g., Serilog)
+			// UPDATED: Use Serilog to log the exception (Phase 2C)
+			Log.Error(contextFeature.Error, "Unhandled exception occurred");
+
 			var errorResponse = new
 			{
 				StatusCode = context.Response.StatusCode,
@@ -134,6 +147,9 @@ app.UseExceptionHandler(errorApp =>
 
 // ADDED: Validation Middleware (NEW - Phase 2B)
 app.UseMiddleware<ValidationMiddleware>();
+
+// ADDED: Serilog HTTP Request Logging (Phase 2C)
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
