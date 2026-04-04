@@ -12,6 +12,7 @@ using TaskManagerAPI.Core.Interfaces;
 using TaskManagerAPI.Infrastructure.Data.Repositories;
 using FluentValidation;
 using TaskManagerAPI.API.Middleware;
+using TaskManagerAPI.API.Responses;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -134,12 +135,10 @@ app.UseExceptionHandler(errorApp =>
 			// UPDATED: Use Serilog to log the exception (Phase 2C)
 			Log.Error(contextFeature.Error, "Unhandled exception occurred");
 
-			var errorResponse = new
-			{
-				StatusCode = context.Response.StatusCode,
-				Message = "An unexpected error occurred. Please try again later.",
-				Details = app.Environment.IsDevelopment() ? contextFeature.Error.Message : null
-			};
+			// UPDATED: Use ApiResponse wrapper (Phase 2D)
+			var errorResponse = ApiResponse<object>.ErrorResponse(
+				"An unexpected error occurred. Please try again later."
+			);
 			await context.Response.WriteAsJsonAsync(errorResponse);
 		}
 	});

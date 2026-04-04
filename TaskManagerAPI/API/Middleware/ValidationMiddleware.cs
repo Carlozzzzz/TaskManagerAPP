@@ -2,6 +2,7 @@
 using FluentValidation;
 using System.Net;
 using System.Text.Json;
+using TaskManagerAPI.API.Responses;
 
 namespace TaskManagerAPI.API.Middleware
 {
@@ -45,12 +46,11 @@ namespace TaskManagerAPI.API.Middleware
                     g => g.Select(e => e.ErrorMessage).ToArray()
                 );
 
-            var response = new
-            {
-                StatusCode = context.Response.StatusCode,
-                Message = "One or more validation errors occurred",
-                Errors = errors
-            };
+            // UPDATED: Use ApiResponse wrapper (Phase 2D)
+            var response = ApiResponse<object>.ErrorResponse(
+                "One or more validation errors occurred",
+                errors
+            );
 
             return context.Response.WriteAsJsonAsync(response);
         }
