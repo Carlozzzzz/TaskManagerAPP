@@ -16,6 +16,9 @@ namespace TaskManagerAPI.Data.Configurations
 			// CRITICAL: Database level unique index for emails
 			builder.Property(u => u.Email).IsRequired().HasMaxLength(255);
 			builder.HasIndex(u => u.Email).IsUnique();
+
+			// ADDED: Index for soft delete queries (Phase 2E)
+			builder.HasIndex(u => u.IsDeleted);
 		}
 	}
 }

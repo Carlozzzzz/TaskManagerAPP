@@ -27,6 +27,16 @@ namespace TaskManagerAPI.Data.Configurations
 
             // Index for performance since we filter by UserId often
             builder.HasIndex(t => t.UserId);
+
+            // ADDED: Composite indexes for common query patterns (Phase 2E)
+            // Used for: GetUserTasksAsync with status filter
+            builder.HasIndex(t => new { t.UserId, t.Status });
+
+            // Used for: GetOverdueTasksAsync
+            builder.HasIndex(t => new { t.UserId, t.DueDate });
+
+            // Used for: Global status filtering
+            builder.HasIndex(t => t.Status);
         }
     }
 }
