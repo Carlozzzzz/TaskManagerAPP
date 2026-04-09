@@ -24,7 +24,14 @@ namespace TaskManagerAPI.Controllers
 		[HttpGet]
 		public async Task<ActionResult<List<TaskDto>>> GetAll()
 		{
-			var tasks = await _taskService.GetAllTasksAsync(GetUserId());
+			var tasks = await _taskService.GetAllTasksAsync();
+			return Ok(tasks);
+		}
+
+		[HttpGet("user-tasks")]
+		public async Task<ActionResult<List<TaskDto>>> GetAllUserTasks()
+		{
+			var tasks = await _taskService.GetAllUserTasksAsync(GetUserId());
 			return Ok(tasks);
 		}
 

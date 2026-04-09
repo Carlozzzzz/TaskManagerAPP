@@ -14,6 +14,10 @@ import TasksPage from './pages/TasksPage';
 import LoadingSpinner from './components/shared/LoadingSpinner';
 import { ConfirmProvider } from './context/ConfirmProvider';
 import { AxiosInterceptor } from './components/layout/AxiosInterceptor';
+import CompanyPage from './pages/CompanyPage';
+import ClientPage from './pages/ClientPage';
+import DepartmentPage from './pages/DepartmentPage';
+import HomePage from './pages/HomePage';
 
 export default function App() {
 	return (
@@ -50,18 +54,22 @@ function AppContent() {
 				}
 			>
 				{/* These "Child" routes will be rendered inside the MainLayout's <Outlet /> */}
+				<Route path="/dashboard" element={<HomePage />} />
 				<Route path="/tasks" element={<TasksPage />} />
+				<Route path="/client" element={<ClientPage />} />
+				<Route path="/department" element={<DepartmentPage />} />
+				<Route path="/company" element={<CompanyPage />} />
 
 				{/* Nested role check can still be applied at the page level or route level */}
 				<Route path="/admin" element={
-					<ProtectedRoute requiredRole="admin">
+					<ProtectedRoute requiredRole="Admin">
 						<AdminPage />
 					</ProtectedRoute>
 				} />
 			</Route>
 
 			{/* 3. DEFAULT REDIRECT */}
-			<Route path="*" element={<Navigate to="/tasks" replace />} />
+			<Route path="*" element={<Navigate to="/dashboard" replace />} />
 		</Routes>
 	);
 }

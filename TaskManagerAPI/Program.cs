@@ -38,6 +38,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 // Dependency Injection: Services
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();

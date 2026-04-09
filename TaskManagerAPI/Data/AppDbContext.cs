@@ -28,6 +28,7 @@ namespace TaskManagerAPI.Data
 		public DbSet<RoleModulePermission> RoleModulePermissions { get; set; } // ADDED
 		public DbSet<UserRole> UserRoles { get; set; } // ADDED
 		public DbSet<AuditLog> AuditLogs { get; set; } // ADDED
+		public DbSet<Company> Companies { get; set; } // ADDED
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

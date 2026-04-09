@@ -41,7 +41,7 @@ namespace TaskManagerAPI.Services
 
 			// NEW: Assign Role based on DB lookup
 			var isFirstUser = !await _context.Users.IgnoreQueryFilters().AnyAsync();
-			var roleName = isFirstUser ? "Admin" : "User";
+			var roleName = isFirstUser ? UserRoles.Admin : UserRoles.User;
 			var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
 
 			if (role != null)
@@ -58,21 +58,23 @@ namespace TaskManagerAPI.Services
 		public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
 		{
 			var user = await _context.Users
-					.Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
-							.ThenInclude(r => r.Permissions).ThenInclude(p => p.Module)
+					.Include(u => u.UserRoles)
+					.ThenInclude(ur => ur.Role)
+					.ThenInclude(r => r.Permissions)
+					.ThenInclude(p => p.Module)
 					.FirstOrDefaultAsync(u => u.Email == dto.Email);
 
 			if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
 				return null;
 
 			var permissions = ResolvePermissions(user);
-			var roles = user.UserRoles.Select(ur => ur.Role.Name).ToList();
+			var role = user.UserRoles.Select(ur => ur.Role.Name).First();
 
 			return new AuthResponseDto
 			{
-				Token = GenerateToken(user, roles),
+				Token = GenerateToken(user, role),
 				Name = user.Name,
-				Roles = roles,
+				Role = role,
 				Permissions = permissions
 			};
 		}
@@ -94,18 +96,17 @@ namespace TaskManagerAPI.Services
 					}).ToList();
 		}
 
-		private string GenerateToken(User user, List<string> roles)
+		private string GenerateToken(User user, string role)
 		{
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
 			var claims = new List<Claim> {
 						new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-						new Claim(ClaimTypes.Name, user.Name)
+
+                        new Claim(ClaimTypes.Name, user.Name),
+                        new Claim(ClaimTypes.Role, role)
 				};
 
-			// ADDED: Add multiple role claims
-			roles.ForEach(r => claims.Add(new Claim(ClaimTypes.Role, r)));
-
-			var token = new JwtSecurityToken(
+            var token = new JwtSecurityToken(
 					issuer: _config["Jwt:Issuer"],
 					audience: _config["Jwt:Audience"],
 					claims: claims,

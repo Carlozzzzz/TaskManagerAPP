@@ -1,8 +1,13 @@
 // src/services/taskService.js
 import apiClient from './apiClient';
 
-export const getTasks = async () => {
+export const getAllTasks = async () => {
   const response = await apiClient.get('/tasks');
+  return response.data;
+};
+
+export const getCurrentUserTasks = async () => {
+  const response = await apiClient.get('/tasks/user-tasks');
   return response.data;
 };
 

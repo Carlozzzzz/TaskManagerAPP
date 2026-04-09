@@ -8,7 +8,8 @@ namespace TaskManagerAPI.Services
 {
 	public interface ITaskService
 	{
-		Task<List<TaskDto>> GetAllTasksAsync(int userId);
+		Task<List<TaskDto>> GetAllTasksAsync();
+		Task<List<TaskDto>> GetAllUserTasksAsync(int userId);
 		Task<TaskDto?> GetTaskByIdAsync(int id, int userId);
 		Task<TaskDto?> CreateTaskAsync(CreateTaskDto dto, int userId);
 		Task<TaskDto?> UpdateStatusAsync(UpdateTaskStatusDto dto, int id, int userId);
@@ -23,7 +24,15 @@ namespace TaskManagerAPI.Services
 		private readonly AppDbContext _context;
 		public TaskService(AppDbContext context) => _context = context;
 
-		public async Task<List<TaskDto>> GetAllTasksAsync(int userId)
+		public async Task<List<TaskDto>> GetAllTasksAsync()
+		{
+			return await _context.Tasks
+					.AsNoTracking() // Performance boost for read-only queries
+					.Select(t => MapToDto(t))
+					.ToListAsync();
+		}
+		
+		public async Task<List<TaskDto>> GetAllUserTasksAsync(int userId)
 		{
 			return await _context.Tasks
 					.AsNoTracking() // Performance boost for read-only queries

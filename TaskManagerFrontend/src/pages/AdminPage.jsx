@@ -1,37 +1,16 @@
 // src/pages/AdminPage.jsx
-import { useState, useEffect } from 'react';
-import { getAllTasksAdmin, getAllUsers } from '../services/adminService';
-import { useToast } from '../hooks/useToast';
+import { useState } from 'react';
 import { useLoading } from '../hooks/useLoading';
+import { useTasks } from '../hooks/useTasks';
+import { useUsers } from '../hooks/useUsers';
 
 export default function AdminPage() {
-	const { showToast } = useToast();
 
-	const [tasks, setTasks] = useState([]);
-	const [users, setUsers] = useState([]);
 	const [activeTab, setActiveTab] = useState('tasks');
-	
-	const { loading, showLoading, hideLoading } = useLoading();
 
-	useEffect(() => {
-		const fetchData = async () => {
-			showLoading();
-			try {
-				const [tasksData, usersData] = await Promise.all([
-					getAllTasksAdmin(),
-					getAllUsers()
-				]);
-				setTasks(tasksData);
-				setUsers(usersData);
-			} catch (error) {
-				// MODIFIED — was console.error, now shows toast
-				showToast('Failed to load admin data. Please refresh the page.', 'error');
-			} finally {
-				hideLoading();
-			}
-		};
-		fetchData();
-	}, []);
+	const { loading, showLoading, hideLoading } = useLoading();
+	const { allTasks } = useTasks();
+	const { allUsers } = useUsers();
 
 	const STATUS_STYLES = {
 		todo: 'bg-gray-100 text-gray-600',
@@ -51,7 +30,7 @@ export default function AdminPage() {
 							: 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'
 						}`}
 				>
-					All Tasks ({tasks.length})
+					All Tasks ({allTasks.length})
 				</button>
 				<button
 					onClick={() => setActiveTab('users')}
@@ -61,7 +40,7 @@ export default function AdminPage() {
 							: 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'
 						}`}
 				>
-					All Users ({users.length})
+					All Users ({allUsers.length})
 				</button>
 			</div>
 
@@ -70,9 +49,9 @@ export default function AdminPage() {
 			) : activeTab === 'tasks' ? (
 
 				<div className="flex flex-col gap-3">
-					{tasks.length === 0 ? (
+					{allTasks.length === 0 ? (
 						<p className="text-center text-sm text-gray-400">No tasks found.</p>
-					) : tasks.map(task => (
+					) : allTasks.map(task => (
 						<div key={task.id} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 							<div className="flex items-start justify-between gap-2">
 								<h3 className="font-medium text-gray-800">{task.title}</h3>
@@ -93,9 +72,9 @@ export default function AdminPage() {
 			) : (
 
 				<div className="flex flex-col gap-3">
-					{users.length === 0 ? (
+					{allUsers.length === 0 ? (
 						<p className="text-center text-sm text-gray-400">No users found.</p>
-					) : users.map(u => (
+					) : allUsers.map(u => (
 						<div key={u.id} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 							<div>
 								<p className="font-medium text-gray-800">{u.name}</p>
