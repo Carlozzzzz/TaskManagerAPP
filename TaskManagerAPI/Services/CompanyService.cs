@@ -1,4 +1,3 @@
-// Services/CompanyService.cs
 using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
@@ -10,9 +9,9 @@ namespace TaskManagerAPI.Services
 	{
 		Task<List<CompanyDto>> GetAllCompanyAsync();
 		Task<CompanyDto?> GetCompanyByIdAsync(int id);
-		Task<CompanyDto?> CreateCompanyAsync(CreateCompanyDto dto, int userId);
-		Task<CompanyDto?> UpdateCompanyAsync(UpdateCompanyDto dto, int userId);
-		Task<bool> DeleteDataAsync(int id, int userId);
+		Task<CompanyDto> CreateCompanyAsync(CreateCompanyDto dto);
+		Task<CompanyDto?> UpdateCompanyAsync(UpdateCompanyDto dto);
+		Task<bool> DeleteDataAsync(int id);
 	}
 
 	public class CompanyService : ICompanyService
@@ -24,22 +23,20 @@ namespace TaskManagerAPI.Services
 		public async Task<List<CompanyDto>> GetAllCompanyAsync()
 		{
 			return await _dbContext.Companies
-				.AsNoTracking()
-				.Select(c => new CompanyDto
-				{
-					Id = c.Id,
-					Description = c.Description,
-					IsActive = c.IsActive
-				})
-				.ToListAsync();
+					.AsNoTracking()
+					.Select(c => new CompanyDto
+					{
+						Id = c.Id,
+						Description = c.Description,
+						IsActive = c.IsActive
+					})
+					.ToListAsync();
 		}
 
 		public async Task<CompanyDto?> GetCompanyByIdAsync(int id)
 		{
-			var comp = await _dbContext.Companies
-				.AsNoTracking()
-				.FirstOrDefaultAsync(c => c.Id == id);
-
+			// Use FindAsync for primary key lookups (more efficient)
+			var comp = await _dbContext.Companies.FindAsync(id);
 			if (comp == null) return null;
 
 			return new CompanyDto
@@ -49,62 +46,60 @@ namespace TaskManagerAPI.Services
 				IsActive = comp.IsActive
 			};
 		}
-		
-		public async Task<CompanyDto?> CreateCompanyAsync(CreateCompanyDto dto, int userId)
+
+		public async Task<CompanyDto> CreateCompanyAsync(CreateCompanyDto dto)
 		{
-			var newTask = new Company
+			var newCompany = new Company
 			{
 				Description = dto.Description,
 				IsActive = dto.IsActive
 			};
 
-			_dbContext.Companies.Add(newTask);
-			
-			await _dbContext.SaveChangesAsync(); // Non-blocking write
+			_dbContext.Companies.Add(newCompany);
+
+			// AppDbContext will automatically set CreatedAt/CreatedBy
+			await _dbContext.SaveChangesAsync();
 
 			return new CompanyDto
 			{
-				Id = newTask.Id,
-				Description = newTask.Description,
-				IsActive = newTask.IsActive
+				Id = newCompany.Id,
+				Description = newCompany.Description,
+				IsActive = newCompany.IsActive
 			};
-			
 		}
 
-
-		public async Task<CompanyDto?> UpdateCompanyAsync(UpdateCompanyDto dto, int userId)
+		public async Task<CompanyDto?> UpdateCompanyAsync(UpdateCompanyDto dto)
 		{
-			var company = _dbContext.Companies.FirstOrDefault(t => t.Id == dto.Id);
-			
-			Console.WriteLine($"DTO : {dto.Id}");
-			Console.WriteLine($"Company : {company?.Id}");
-			
-			
+			var company = await _dbContext.Companies.FindAsync(dto.Id);
 			if (company == null) return null;
-			
+
 			company.Description = dto.Description;
 			company.IsActive = dto.IsActive;
-			
+
+			// AppDbContext will automatically set UpdatedAt/UpdatedBy
+			// and trigger the AuditLog record
 			await _dbContext.SaveChangesAsync();
-			
+
 			return new CompanyDto
 			{
 				Id = company.Id,
 				Description = company.Description,
 				IsActive = company.IsActive
 			};
-
 		}
-		
-		public async Task<bool> DeleteDataAsync(int id, int userId)
+
+		public async Task<bool> DeleteDataAsync(int id)
 		{
-				var company = await _dbContext.Companies.FirstOrDefaultAsync(t => t.Id == id);
+			var company = await _dbContext.Companies.FindAsync(id);
 			if (company == null) return false;
 
-			_dbContext.Companies.Remove(company);
+			// REPLACED: _dbContext.Companies.Remove(company);
+			// We flip the bit instead of removing. 
+			// AppDbContext.ApplyAuditProperties will see this and set DeletedAt/DeletedBy.
+			company.IsDeleted = true;
+
 			await _dbContext.SaveChangesAsync();
 			return true;
 		}
-
 	}
 }

@@ -26,7 +26,7 @@ namespace TaskManagerAPI.Data.Configurations
                 .HasDefaultValueSql("GETUTCDATE()");
 
             // Index for performance since we filter by UserId often
-            builder.HasIndex(t => t.UserId);
+            builder.HasIndex(t => t.CreatedBy);
         }
     }
 }

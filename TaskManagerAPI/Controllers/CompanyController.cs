@@ -1,9 +1,7 @@
-// Controllers/CompanyController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Services;
-using System.Security.Claims;
 
 namespace TaskManagerAPI.Controllers
 {
@@ -18,45 +16,44 @@ namespace TaskManagerAPI.Controllers
 		[HttpGet]
 		public async Task<ActionResult<List<CompanyDto>>> GetAll()
 		{
-			var companies = await _companyService.GetAllCompanyAsync();
-			return Ok(companies);
+			return Ok(await _companyService.GetAllCompanyAsync());
 		}
 
 		[HttpGet("{id}")]
 		public async Task<ActionResult<CompanyDto>> GetById(int id)
 		{
 			var company = await _companyService.GetCompanyByIdAsync(id);
+			if (company == null) return NotFound();
 			return Ok(company);
-
 		}
 
 		[HttpPost]
-		public async Task<ActionResult<TaskDto>> Create([FromBody] CreateCompanyDto dto)
+		public async Task<ActionResult<CompanyDto>> Create([FromBody] CreateCompanyDto dto)
 		{
-			var company = await _companyService.CreateCompanyAsync(dto, GetUserId());
-			return Ok(company);
+			// Note: We no longer need to pass GetUserId() manually if 
+			// the Service uses the DbContext which already has ICurrentUserService
+			var company = await _companyService.CreateCompanyAsync(dto);
+			return CreatedAtAction(nameof(GetById), new { id = company.Id }, company);
 		}
 
 		[HttpPut("{id}")]
 		public async Task<ActionResult<CompanyDto>> Update(int id, [FromBody] UpdateCompanyDto dto)
 		{
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine("------------------------------------------------------------------------------");
-			Console.WriteLine($"Received Update request for Company ID: {id} DTO ID : {dto.Id} with Description: {dto.Description} and IsActive: {dto.IsActive}");
-			Console.WriteLine("------------------------------------------------------------------------------");
-			Console.ResetColor();
-			
-			var company = await _companyService.UpdateCompanyAsync(dto, GetUserId());
+			// SENIOR CHECK: Ensure the URL ID matches the Body ID
+			if (id != dto.Id) return BadRequest("ID Mismatch");
+
+			var company = await _companyService.UpdateCompanyAsync(dto);
 			if (company == null) return NotFound();
+
 			return Ok(company);
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(int id)
 		{
-			var success = await _companyService.DeleteDataAsync(id, GetUserId());
+			var success = await _companyService.DeleteDataAsync(id);
 			if (!success) return NotFound();
-			return NoContent(); // 204 No Content is standard for successful deletes
+			return NoContent();
 		}
 	}
 }

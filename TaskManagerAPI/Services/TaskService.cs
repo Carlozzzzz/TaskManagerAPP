@@ -36,7 +36,7 @@ namespace TaskManagerAPI.Services
 		{
 			return await _context.Tasks
 					.AsNoTracking() // Performance boost for read-only queries
-					.Where(t => t.UserId == userId)
+					.Where(t => t.CreatedBy == userId)
 					.Select(t => MapToDto(t))
 					.ToListAsync();
 		}
@@ -45,7 +45,7 @@ namespace TaskManagerAPI.Services
 		{
 			var task = await _context.Tasks
 					.AsNoTracking()
-					.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+					.FirstOrDefaultAsync(t => t.Id == id && t.CreatedBy == userId);
 
 			return task == null ? null : MapToDto(task);
 		}
@@ -69,7 +69,7 @@ namespace TaskManagerAPI.Services
 				Description = dto.Description,
 				Status = "todo",
 				DueDate = dto.DueDate,
-				UserId = userId
+				CreatedBy = userId
 			};
 
 			_context.Tasks.Add(newTask);
@@ -80,7 +80,7 @@ namespace TaskManagerAPI.Services
 
 		public async Task<bool> DeleteDataAsync(int id, int userId)
 		{
-			var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+			var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.CreatedBy == userId);
 			if (task == null) return false;
 
 			_context.Tasks.Remove(task);
@@ -90,7 +90,7 @@ namespace TaskManagerAPI.Services
 
 		public async Task<TaskDto?> UpdateStatusAsync(UpdateTaskStatusDto dto, int id, int userId)
 		{
-			var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+			var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.CreatedBy == userId);
 			if (task == null) return null;
 
 			task.Status = dto.Status;
