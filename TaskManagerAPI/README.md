@@ -1,69 +1,62 @@
-﻿--- FILE: ARCHITECTURE.md ---
-# 🏛 Architectural Design & Workflow
+﻿# 🚀 Task Manager API — Enterprise Template
 
-This project uses the **Repository + Unit of Work (UoW)** pattern to manage data persistence and business logic.
+This is a professional-grade .NET 8 Web API built using the **Repository + Unit of Work** pattern.
 
-## 🔄 Core Data Flow
+## 🛠 Tech Stack
+- **Backend:** .NET 8 (C#)
+- **Database:** SQL Server
+- **ORM:** Entity Framework Core
+- **Authentication:** JWT Bearer
 
-Regardless of the module, the flow follows this hierarchy:
-`HTTP Request` → `Controller` → `Service` → `Repository` → `Unit of Work` → `DbContext` → `SQL Server`
+## 🏁 Getting Started
 
-### 1. Simple CRUD (Standard)
-For most modules (e.g., Company), we use the **Generic Repository**.
-- **Service** stages changes via `IRepository<T>`.
-- **UnitOfWork** commits changes via `SaveAsync()`.
+### Prerequisites
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
 
-### 2. Complex Queries (Joins/Projections)
-When a query requires `.Include()`, `.Select()` projections, or complex filters:
-- We extend `IRepository<T>` into a specific `IXRepository`.
-- The query logic is hidden inside the implementation to keep the Service clean.
-
-### 3. Multi-Entity Transactions
-For operations like **Payroll** or **Transfers** where multiple tables must update together:
-- Use `IUnitOfWork.BeginTransactionAsync()`.
-- If all repositories succeed → `CommitAsync()`.
-- If any fail → `RollbackAsync()`.
+### Configuration
+1. Update `DefaultConnection` in `appsettings.json`.
+2. Configure JWT settings in `appsettings.json`.
 
 ---
 
-## 🚦 The Decision Tree
-Use this every time you add a new feature:
+## 🗄️ Database & Migrations
 
-1. **Is it business logic or a calculation?**
-   - ✅ Add to `IXService`. Done.
-2. **Is it a simple DB query (GetById, GetAll, Add)?**
-   - ✅ Use generic `IRepository<T>` + Map in service. Done.
-3. **Does it need JOINs, Includes, or specific SQL filters?**
-   - ✅ Create `IXRepository : IRepository<X>` and add the query there.
-4. **Does it touch multiple entities that must "all-or-nothing" succeed?**
-   - ✅ Use `IUnitOfWork` Transaction methods.
+Use these commands to manage your database schema.
 
----
+### Common Commands
+- **Add a new migration:**
+  `dotnet ef migrations add [MigrationName] --context AppDbContext`
+- **Update database to latest:**
+  `dotnet ef database update --context AppDbContext`
+- **Remove last migration (before updating DB):**
+  `dotnet ef migrations remove --context AppDbContext`
 
-## ⚖️ Layer Responsibilities
-
-| Layer | Responsibility | Constraints |
-| :--- | :--- | :--- |
-| **Controller** | Thin. HTTP In / Response Out. | No logic. No DB calls. |
-| **Service** | The "Brain". Business logic & DTO mapping. | No EF Core references. |
-| **IRepository** | Data Staging. | Never calls `SaveChanges`. |
-| **IUnitOfWork** | The "Commit Point". | Only layer that saves to DB. |
-| **AppDbContext** | Infrastructure. | Handles Audit Fields (CreatedAt, etc.) automatically. |
-| **DTOs** | API Shape. | Plain objects. No logic. |
+### 📜 Migration History (Log)
+// ADDED: Track your schema changes here
+1. `InitialCreate`
+2. `Remove_IdUserRole_Model`
+3. `Create_Company_Model`
+4. `update_LogsRelated_RestructureModel`
+5. `update_DeletedByFromISoftDelete_UserModel_RestructureModel`
+5. `update_UpdatePermissionRoles_RestructureModel`
 
 ---
 
-## 💎 Senior Engineering Principles Applied
-
-- **Thin Controllers:** Logic belongs in services so it can be tested and reused.
-- **Audit Automation:** `CreatedAt`, `UpdatedAt`, and `DeletedAt` are handled by `AppDbContext` overrides. Never set these manually in a Service.
-- **Soft Delete:** We never delete rows. We set `IsDeleted = true`. A Global Query Filter in the DbContext ensures deleted rows never show up in queries.
-- **Async/Await:** Used from the Controller down to the Database to prevent thread-blocking.
-- **Dependency Injection:** We use `Scoped` lifetimes for Repositories, Services, and UnitOfWork to ensure data consistency within a single web request.
+## 🔑 Access & Accounts
+// ADDED: Development test accounts
+- **Admin/Dev User:** `carloz.claude@gmail.com`
 
 ---
 
-## 📝 Registration Pattern (Program.cs)
-When adding a new module:
-1. **Generic Only:** Just register the Service.
-2. **Complex:** Register both the specific Repository and the Service.
+## 🏗 Understanding the Architecture
+We follow a strict **Clean Architecture-lite** approach. Before adding any new features, please read the **[ARCHITECTURE.md](./ARCHITECTURE.md)** file.
+
+## 📂 Project Structure
+- **/Controllers**: Thin entry points.
+- **/Services**: Business logic & DTO mapping.
+- **/Foundation**: Generic Repository & Unit of Work.
+- **/Repositories**: Entity-specific complex queries.
+- **/Models**: Database entities.
+- **/DTOs**: Data Transfer Objects.
+- **/Data**: AppDbContext and Migrations.

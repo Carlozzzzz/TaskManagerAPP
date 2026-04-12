@@ -50,6 +50,13 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 
+// ─── Module module ────────────────────────────────────────────────────────
+builder.Services.AddScoped<IModuleService, ModuleService>();
+
+// ─── Role module ────────────────────────────────────────────────────────
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+
 // Dependency Injection: Services
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserService, UserService>();

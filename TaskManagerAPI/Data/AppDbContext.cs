@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.Models;
 using TaskManagerAPI.Models.Base;
 using TaskManagerAPI.Models.Interfaces;
@@ -31,16 +31,24 @@ namespace TaskManagerAPI.Data
 		{
 			base.OnModelCreating(modelBuilder);
 
-			// 1. Load configurations from Assembly
+			// Load configurations from Assembly
 			modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-			// 2. Configure Many-to-Many Join Table
-			modelBuilder.Entity<UserRole>()
-					.HasKey(ur => new { ur.UserId, ur.RoleId });
+            // ─── UserRole Configuration ──────────────────────────────────────────
+            // REPLACED: Composite Key removed. 
+            // We now use the 'Id' from BaseEntity as the Primary Key.
+            modelBuilder.Entity<UserRole>()
+                    .HasKey(ur => ur.Id);
 
-			// 3. Automated Soft Delete Filter
-			// This hides records where IsDeleted == true for any class implementing ISoftDelete
-			foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            // ADDED: Unique Index
+            // This maintains the business rule: One user cannot have the same role twice.
+            modelBuilder.Entity<UserRole>()
+                    .HasIndex(ur => new { ur.UserId, ur.RoleId })
+                    .IsUnique();
+
+            // ─── Automated Soft Delete Filter ────────────────────────────────────
+            // This hides records where IsDeleted == true for any class implementing ISoftDelete
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
 			{
 				if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
 				{
