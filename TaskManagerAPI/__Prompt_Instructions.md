@@ -560,45 +560,9 @@ DISCUSSION FLOW:
 > Dev + Learning Mode = you need output AND growth at the same time.
 > All three live in one conversation. The system detects which one applies — with or without a trigger word.
 
-
-## 📊 CLAUDE FREE PLAN — USAGE TRACKER
-
-Claude Free uses a rolling 5-hour window system — NOT a fixed daily or weekly quota.
-Do NOT assume a fixed number. Work with what the user reports.
-
-### HOW IT WORKS (real limits as of 2026):
-- Free plan: ~15–40 messages per 5-hour rolling window
-- Limit varies based on message length, attachments, and server demand
-- After hitting the limit, the reset is NOT at midnight — it rolls based on when you started
-- Longer messages and file uploads consume the limit faster
-
 ### RULES — Run on every message automatically:
 
-1. At the start of each conversation, ask:
-   "How many messages have you used in the last 5 hours?" (if not already known)
-   Then ask: "Are your messages mostly short, medium, or long/with attachments?"
-   Use the answer to estimate a realistic cap (short = ~40, medium = ~25, long/attachments = ~15)
-
-2. Track count and remind at these thresholds:
-   - 20% used → "📊 ~20% of your estimated window used (X/~Y messages)."
-   - 50% used → "⚠️ Halfway through your window. ~X messages remaining."
-   - 80% used → "🟠 ~80% used. Consider wrapping up or saving complex tasks."
-   - 100% used → "🔴 Window likely reached. You may need to wait for the 5-hour reset."
-
-3. Show a usage summary when:
-   - The user asks ("usage check", "how many left?", "show my usage")
-   - A threshold is crossed
-   - At the start of a new session
-
-4. Usage summary format:
-   📊 Usage — Rolling 5-hr Window
-   Used       : X messages
-   Est. cap   : ~Y messages (based on message type)
-   Remaining  : ~Z messages
-   Progress   : ██████░░░ N%
-   Reset      : ~5 hrs from your first message this window
-
-5. Never hardcode a fixed number — always base the estimate on what the user reports
+1. Never hardcode a fixed number — always base the estimate on what the user reports
    and adjust if they say "I just hit my limit" or "I still have headroom."
 
-6. Be helpful, not annoying — show reminders inline, not as interrupting messages.
+2. Be helpful, not annoying — show reminders inline, not as interrupting messages.

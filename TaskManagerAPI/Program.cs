@@ -1,12 +1,14 @@
 // Program.cs
-using System.Text;
-using System.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Net;
+using System.Text;
 using TaskManagerAPI.Data;
+using TaskManagerAPI.Foundation;
+using TaskManagerAPI.Repositories;
 using TaskManagerAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,15 +33,43 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
 		options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 		
-// ADDED: Allow services to access the current web request (Required for CurrentUserService)
+// ADDED: Allow services to access the current web request
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// ─── FOUNDATION — register once, works for ALL entities ───────────────────
+// IRepository<Company>, IRepository<Employee>, IRepository<Department>, etc.
+// all resolve to Repository<T> automatically. No per-entity registration needed.
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// ─── Company module ────────────────────────────────────────────────────────
+// ADDED: ICompanyRepository registered — replaces generic repo for Company.
+// When ICompanyRepository is requested, DI resolves CompanyRepository
+// which extends Repository<Company> so all generic methods still work.
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
 
 // Dependency Injection: Services
 builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PATTERN FOR FUTURE MODULES:
+//
+// Simple CRUD only — no complex queries:
+//   builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+//   (generic IRepository<Employee> resolves automatically — no extra line)
+//
+// Complex queries needed:
+//   builder.Services.AddScoped<IClientRepository, ClientRepository>();
+//   builder.Services.AddScoped<IClientService,    ClientService>();
+//
+// IUnitOfWork is already registered above — inject it into any service.
+// ─────────────────────────────────────────────────────────────────────────────
+
 
 builder.Services.AddControllers();
 

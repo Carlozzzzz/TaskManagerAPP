@@ -26,5 +26,6 @@ namespace TaskManagerAPI.Models
         // 2. Navigation Property (The Link)
         // This allows you to say: myUser.UserRoles.Select(ur => ur.Role.Name)
         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+        public int? DeletedBy { get; set; }
     }
 }

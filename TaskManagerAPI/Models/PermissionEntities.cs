@@ -31,11 +31,12 @@ namespace TaskManagerAPI.Models
 		public bool CanEdit { get; set; }
 		public bool CanDelete { get; set; }
 		public bool IsDeleted { get; set; }
-		public DateTime? DeletedAt { get; set; }
+        public int? DeletedBy { get; set; }
+        public DateTime? DeletedAt { get; set; }
 
 		public virtual Role Role { get; set; } = null!;    // MODIFIED
 		public virtual Module Module { get; set; } = null!; // MODIFIED
-	}
+    }
 
 	// Join Table for Many-to-Many
 	public class UserRole

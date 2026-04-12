@@ -52,7 +52,7 @@ export default function LoginPage() {
 				: await login(email, password);
 
 			setAuth(data);
-			navigate('/tasks');
+			navigate('/dashboard');
 		} catch (err) {
 			// MODIFIED — Improved error extraction from Axios
 			const message = err.response?.data?.message || err.response?.data || 'Invalid credentials';
