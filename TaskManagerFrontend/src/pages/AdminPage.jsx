@@ -1,6 +1,5 @@
 // src/pages/AdminPage.jsx
 import { useState } from 'react';
-import { useLoading } from '../hooks/useLoading';
 import { useTasks } from '../hooks/useTasks';
 import { useUsers } from '../hooks/useUsers';
 
@@ -8,9 +7,9 @@ export default function AdminPage() {
 
 	const [activeTab, setActiveTab] = useState('tasks');
 
-	const { loading, showLoading, hideLoading } = useLoading();
-	const { allTasks } = useTasks();
-	const { allUsers } = useUsers();
+	const { allTasks, loading } = useTasks();
+	const allUsers = [];
+	// const { allUsers } = useUsers();
 
 	const STATUS_STYLES = {
 		todo: 'bg-gray-100 text-gray-600',

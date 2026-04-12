@@ -2,7 +2,17 @@
 import React from 'react';
 import { SwapVert } from '@mui/icons-material';
 
-export default function DataTable({ columns, data, actions = [], isLoading }) {
+{/* 
+  Add multiple select features
+  Add custom renderer features for the column data
+*/}
+
+export default function DataTable({
+	columns,
+	data,
+	actions = [],
+	isLoading
+}) {
 	return (
 		<div className="w-full overflow-hidden">
 			<table className="w-full border-collapse text-left">
@@ -38,10 +48,6 @@ export default function DataTable({ columns, data, actions = [], isLoading }) {
 
 								{actions.length > 0 && (
 									<td className="px-6 py-4 text-right">
-										{/* 
-                        REMOVED: opacity-0 group-hover:opacity-100
-                        ADDED: Slightly more spacing and a consistent button style
-                    */}
 										<div className="flex justify-end gap-2">
 											{actions.map((act, aIdx) => (
 												<button

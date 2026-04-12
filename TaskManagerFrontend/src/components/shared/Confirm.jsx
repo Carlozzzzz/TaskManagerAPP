@@ -26,7 +26,7 @@ export function ConfirmModal({ config, onResolve }) {
 	const colorClasses = colorFinder();
 	
 	return ReactDOM.createPortal(
-		<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4"> {/* FIXED: itesm-center & z-index */}
+		<div className="z-confirm fixed inset-0 flex items-center justify-center p-4"> {/* FIXED: itesm-center & z-index */}
 			{/* Backdrop - Now a SIBLING, not a parent of the card */}
 			<div
 				className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"

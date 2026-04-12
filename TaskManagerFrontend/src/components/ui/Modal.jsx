@@ -5,9 +5,9 @@ import { createPortal } from "react-dom";
 export default function Modal({ isOpen, onClose, title, children, footer }) {
 	if (!isOpen) return null;
 	return createPortal(
-		<div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+		<div className="fixed inset-0 z-modal flex items-center justify-center p-4">
 			<div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
-			<div className="relative z-[10000] w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+			<div className="relative z-modal w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
 				{/* HEADER */}
 				<div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
 					<h3 className="text-lg font-bold text-slate-800">{title}</h3>

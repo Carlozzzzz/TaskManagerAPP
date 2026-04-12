@@ -2,29 +2,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { companyService } from '../services/companyService';
 import { useToast } from './useToast';
+import { useConfirm } from './useConfirm';
+import { useLoading } from './useLoading';
 
 export const useCompany = () => {
 	const [companies, setCompanies] = useState([]);
-	const [loading, setLoading] = useState(false);
+
 	const { showToast } = useToast();
+	const { loading, showLoading, hideLoading } = useLoading();
+
 
 	const fetchCompanies = useCallback(async () => {
-		setLoading(true);
+		showLoading();
 		try {
 			const data = await companyService.getAll();
 			setCompanies(data);
 		} catch (err) {
 			showToast("Failed to load companies", "error");
 		} finally {
-			setLoading(false);
+			hideLoading();
 		}
 	}, [showToast]);
 
 	const saveCompany = async (formData, id = null) => {
 		try {
+			showLoading();
+
 			if (id) {
-				// FIXED: We spread the formData and explicitly add the ID 
-				// so it matches the backend UpdateCompanyDto requirements.
 				const updatePayload = { ...formData, id };
 				await companyService.update(id, updatePayload);
 				showToast("Company updated successfully", "success");
@@ -32,21 +36,28 @@ export const useCompany = () => {
 				await companyService.create(formData);
 				showToast("Company created successfully", "success");
 			}
+			
 			await fetchCompanies();
 			return true;
 		} catch (err) {
 			showToast("Error saving company", "error");
 			return false;
+		} finally {
+			hideLoading();
 		}
 	};
 
 	const deleteCompany = async (id) => {
 		try {
+			showLoading();
+
 			await companyService.delete(id);
 			showToast("Company removed", "success");
 			await fetchCompanies();
 		} catch (err) {
 			showToast("Delete failed", "error");
+		} finally {
+			hideLoading();
 		}
 	};
 
@@ -54,5 +65,5 @@ export const useCompany = () => {
 		fetchCompanies();
 	}, [fetchCompanies]);
 
-	return { companies, loading, saveCompany, deleteCompany, refresh: fetchCompanies };
+	return { companies, loading, saveCompany, deleteCompany, fetchCompanies };
 };

@@ -1,19 +1,19 @@
 // MODIFIED: Integrating your Promise-based useConfirm
 import React, { useState } from 'react';
-import { useCompany } from '../hooks/useCompany';
+import { useCompany } from '../../hooks/useCompany';
 
-import { useConfirm } from '../hooks/useConfirm';
-import Badge from '../components/ui/Badge';
-import Button from '../components/ui/Button';
-import DataTable from '../components/ui/DataTable';
-import Modal from '../components/ui/Modal';
+import { useConfirm } from '../../hooks/useConfirm';
+import Badge from '../../components/ui/Badge';
+import Button from '../../components/ui/Button';
+import DataTable from '../../components/ui/DataTable';
+import Modal from '../../components/ui/Modal';
 import { Add, Edit, Delete, PictureAsPdf } from '@mui/icons-material';
-import CompanyAddEditForm from '../components/modules/Maintenance/Company/CompanyAddEditForm';
-import { usePermissions } from '../hooks/usePermissions';
+import CompanyAddEditForm from '../../components/modules/Maintenance/Company/CompanyAddEditForm';
+import { usePermissions } from '../../hooks/usePermissions';
 
 export default function CompanyPage() {
 	const { companies, loading, saveCompany, deleteCompany } = useCompany();
-	const { askConfirm } = useConfirm(); // MODIFIED: Using your specific hook
+	const { askConfirm } = useConfirm();
 	const { canAdd, canEdit, canDelete } = usePermissions('companies');
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,11 +25,17 @@ export default function CompanyPage() {
 	};
 
 	const handleFormSubmit = async (formData) => {
-		const success = await saveCompany(formData, selectedCompany?.id);
-		if (success) setIsModalOpen(false);
+		const isOk = await askConfirm({
+			title: 'Update Company?',
+			message: 'Are you sure you want to proceed?'
+		});
+		
+		if (isOk) {
+			const success = await saveCompany(formData, selectedCompany?.id);
+			if (success) setIsModalOpen(false);
+		}
 	};
 
-	// REPLACED: Updated to use the Promise pattern from your useConfirm
 	const handleDeleteRequest = async (company) => {
 		const confirmed = await askConfirm({
 			title: 'Delete Company',
@@ -78,7 +84,7 @@ export default function CompanyPage() {
 		<div className="space-y-6 rounded-lg bg-white p-4">
 			<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
 				<div>
-					<h1 className="text-2xl font-bold tracking-tight text-slate-900">Companies</h1>
+					<h1 className="text-2xl font-bold tracking-tight text-slate-500">Companies</h1>
 					<p className="text-sm font-medium tracking-tight text-slate-400">Manage corporate identities and legal status</p>
 				</div>
 				{canAdd && (

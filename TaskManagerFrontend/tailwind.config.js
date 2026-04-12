@@ -9,8 +9,9 @@ export default {
 			zIndex: {
 				'header': '50',
 				'modal': '100',
-				'toast': '9000',
-				'spinner': '9999',
+				'confirm': '150',
+				'toast': '200',
+				'spinner': '250',
 			},
 			colors: {
 				primary: '#3C50E0',

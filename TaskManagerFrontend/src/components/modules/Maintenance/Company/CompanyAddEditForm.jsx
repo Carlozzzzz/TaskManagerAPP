@@ -26,13 +26,9 @@ export default function CompanyForm({ initialData, onSubmit }) {
 	// Inside CompanyAddEditForm.jsx
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log("Submit triggered!"); // DEBUG 1
 
 		if (validate()) {
-			console.log("Validation passed! Sending to parent..."); // DEBUG 2
 			onSubmit(form);
-		} else {
-			console.warn("Validation failed!", errors); // DEBUG 3
 		}
 	};
 
@@ -45,6 +41,7 @@ export default function CompanyForm({ initialData, onSubmit }) {
 				onChange={(e) => setForm({ ...form, description: e.target.value })}
 				placeholder="e.g. Acme Corp"
 				error={errors.description}
+				errorMessage={errors.description}
 			/>
 			<div className="flex items-center gap-3 py-2">
 				<input

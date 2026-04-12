@@ -1,21 +1,15 @@
 // src/pages/TasksPage.jsx
 import { useMemo, useState } from 'react';
 import { useTasks } from '../hooks/useTasks';
-import { createTask, deleteTask, updateTaskStatus } from '../services/taskService';
-import TaskCard from '../components/modules/TaskCard';
-import TaskForm from '../components/modules/TaskForm';
-import TaskFilter from '../components/modules/TaskFilter';
-import { useToast } from '../hooks/useToast';
+import TaskCard from '../components/modules/Task/TaskCard';
+import TaskForm from '../components/modules/Task/TaskForm';
+import TaskFilter from '../components/modules/Task/TaskFilter';
 import { useConfirm } from '../hooks/useConfirm';
-import { useLoading } from '../hooks/useLoading';
 
 export default function TasksPage() {
-	const { tasks, loading, refetch } = useTasks();
-	const [submitting, setSubmitting] = useState(false);
+	const { tasks, loading, saveTask, updateStatus, deleteTask } = useTasks();
 	const [activeFilter, setActiveFilter] = useState('all');
 
-	const { showToast } = useToast();
-	const { showLoading, hideLoading } = useLoading();
 	const { askConfirm } = useConfirm();
 
 	const filteredTasks = useMemo(() =>
@@ -23,7 +17,7 @@ export default function TasksPage() {
 			? tasks
 			: tasks.filter(t => t.status === activeFilter),
 		[tasks, activeFilter]);
-		
+
 	const taskCounts = useMemo(() => ({
 		all: tasks.length,
 		todo: tasks.filter(t => t.status === 'todo').length,
@@ -31,84 +25,32 @@ export default function TasksPage() {
 		done: tasks.filter(t => t.status === 'done').length,
 	}), [tasks]);
 
-	const STATUS_CYCLE = {
-		todo: 'inprogress',
-		inprogress: 'done',
-		done: 'todo',
-	};
-
 	const handleCreate = async ({ title, description, dueDate }) => {
-		try {
+		const isOk = await askConfirm({
+			title: 'Create Task?',
+			message: 'Are you sure you want to proceed?'
+		});
 
-			const isOk = await askConfirm({
-				title: 'Create Task?',
-				message: 'Are you sure you want to proceed?'
-			});
-
-			if (!isOk) return;
-
-			showLoading();
-
-			setSubmitting(true);
-			await createTask(title, description, dueDate);
-			refetch();
-			const message = 'Task created successfully.';
-			showToast(message, 'success');
-		} catch (error) {
-			console.error(error);
-			showToast('Failed to create task. Please try again.', 'error');
-		} finally {
-			setSubmitting(false);
-			hideLoading();
-		}
+		if (!isOk) await saveTask(title, description, dueDate);
 	};
 
 	const handleUpdateStatus = async (id, currentStatus) => {
-		try {
-			const isOk = await askConfirm({
-				title: 'Update Task Status?',
-				message: 'Are you sure you want to proceed?'
-			});
+		const isOk = await askConfirm({
+			title: 'Update Task Status?',
+			message: 'Are you sure you want to proceed?'
+		});
 
-			if (!isOk) return;
-
-			showLoading();
-
-			const newStatus = STATUS_CYCLE[currentStatus];
-			await updateTaskStatus(id, newStatus);
-			refetch();
-			const message = 'Task status updated.';
-			showToast(message, 'success');
-		} catch (error) {
-			console.error(error);
-			showToast('Failed to update task status. Please try again.', 'error');
-		} finally {
-			hideLoading();
-		}
-	};
+		if (isOk) await updateStatus(id, currentStatus);
+	}
 
 	const handleDelete = async (id) => {
-		try {
+		const isOk = await askConfirm({
+			title: 'Delete Task?',
+			type: 'delete',
+			message: 'Are you sure you want to delete this? This action cannot be undone.'
+		});
 
-			const isOk = await askConfirm({
-				title: 'Delete Task?',
-				type: 'delete',
-				message: 'Are you sure you want to delete this? This action cannot be undone.'
-			});
-
-			if (!isOk) return;
-
-			showLoading();
-
-			await deleteTask(id);
-			refetch();
-			showToast('Successfully deleted!', 'success');
-		} catch (err) {
-			// MODIFIED — was console.error, now shows toast
-			showToast('Failed to delete task. Please try again.', 'error');
-		} finally {
-			hideLoading();
-		}
+		if (isOk) await deleteTask(id);
 	};
 
 	const handleFilterChange = (status) => setActiveFilter(status);
@@ -120,7 +62,7 @@ export default function TasksPage() {
 				activeFilter={activeFilter}
 				taskCounts={taskCounts}
 			/>
-			<TaskForm onSubmit={handleCreate} loading={submitting} />
+			<TaskForm onSubmit={handleCreate} loading={loading} />
 
 			{loading ? (
 				<p className="text-center text-sm text-gray-400">Loading tasks...</p>

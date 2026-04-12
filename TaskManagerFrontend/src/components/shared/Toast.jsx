@@ -1,5 +1,6 @@
 // src/components/shared/Toast.jsx
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 // ADDED — type config: color + icon per type
 const TYPE_STYLES = {
@@ -51,7 +52,7 @@ export default function Toast({ toast, onHide }) {
 
   const styles = TYPE_STYLES[toast.type] ?? TYPE_STYLES.error;
 
-  return (
+  return createPortal(
     // ADDED — fixed position: bottom-right corner, above everything
     <div
       className={`
@@ -80,6 +81,7 @@ export default function Toast({ toast, onHide }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,20 +1,19 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AxiosInterceptor } from './components/layout/AxiosInterceptor';
 import { AuthProvider } from './context/AuthProvider';
-import { ToastProvider } from './context/ToastProvider'; // Fixed typo from 'Proivider'
+import { ToastProvider } from './context/ToastProvider';
 import { LoadingProvider } from './context/LoadingProvider';
+import { ConfirmProvider } from './context/ConfirmProvider';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
-import MainLayout from './components/layout/MainLayout'; // ADDED
+import MainLayout from './components/layout/MainLayout';
 
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import TasksPage from './pages/TasksPage';
-import LoadingSpinner from './components/shared/LoadingSpinner';
-import { ConfirmProvider } from './context/ConfirmProvider';
-import { AxiosInterceptor } from './components/layout/AxiosInterceptor';
-import CompanyPage from './pages/CompanyPage';
+import CompanyPage from './pages/Maintenance/CompanyPage';
 import ClientPage from './pages/ClientPage';
 import DepartmentPage from './pages/DepartmentPage';
 import HomePage from './pages/HomePage';
@@ -26,7 +25,6 @@ export default function App() {
 				<ToastProvider>
 					<ConfirmProvider>
 						<AuthProvider>
-							<LoadingSpinner />
 							<AxiosInterceptor>
 								<AppContent />
 							</AxiosInterceptor>
