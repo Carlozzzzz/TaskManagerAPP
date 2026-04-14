@@ -40,7 +40,7 @@ Use these commands to manage your database schema.
 4. `update_LogsRelated_RestructureModel`
 5. `update_DeletedByFromISoftDelete_UserModel_RestructureModel`
 5. `update_UpdatePermissionRoles_RestructureModel`
-
+Add-Migration update_UserTable -Context AppDbContext
 ---
 
 ## 🔑 Access & Accounts

@@ -33,6 +33,14 @@ namespace TaskManagerAPI.Controllers
 			return result == null ? Unauthorized("Invalid credentials") : Ok(result);
 		}
 
+		[HttpPost("reset-user-password/{id}")]
+		public async Task<IActionResult> ResetUserPassword(int id)
+		{
+			var result = await _authService.ResetPasswordAsync(id);
+            if (!result) return NotFound();
+            return NoContent();
+        }
+
 		[Authorize]
 		[HttpGet("me")]
 		public async Task<IActionResult> GetMe()

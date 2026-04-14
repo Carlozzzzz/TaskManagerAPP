@@ -11,6 +11,11 @@ export const login = async (email, password) => {
   return response.data; // returns { token, name, role }
 };
 
+export const resetUserPass = async (userId) => {
+	const response = await apiClient.post(`auth/reset-user-password/${userId}`)
+	return response.data;
+}
+
 export const getCurrentUser = async () => {
   const response = await apiClient.get('/auth/me');
   return response.data;

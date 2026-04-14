@@ -1,9 +1,10 @@
 // Services/AuthService.cs
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using System.Threading.Tasks;
 using TaskManagerAPI.Constants;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
@@ -15,7 +16,8 @@ namespace TaskManagerAPI.Services
 	{
 		Task<AuthResponseDto?> RegisterAsync(RegisterDto dto);
 		Task<AuthResponseDto?> LoginAsync(LoginDto dto);
-	}
+		Task<bool> ResetPasswordAsync(int userId);
+    }
 
 	public class AuthService : IAuthService
 	{
@@ -79,8 +81,25 @@ namespace TaskManagerAPI.Services
 			};
 		}
 
-		// THE FLATTENER: Squashes multiple roles into additive permissions
-		private List<PermissionDto> ResolvePermissions(User user)
+		public async Task<bool> ResetPasswordAsync(int userId)
+		{
+			var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+			if(user == null) return false;
+
+            string defaultPassword = "password";
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
+			user.Name = "Carlos Romulo";
+
+            await _context.SaveChangesAsync();
+
+			return true;
+
+        }
+
+        // THE FLATTENER: Squashes multiple roles into additive permissions
+        private List<PermissionDto> ResolvePermissions(User user)
 		{
 			return user.UserRoles
 					.SelectMany(ur => ur.Role.Permissions)

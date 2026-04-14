@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagerAPI.Constants;
+using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Services;
 
 namespace TaskManagerAPI.Controllers
@@ -19,5 +20,16 @@ namespace TaskManagerAPI.Controllers
 
 		[HttpGet("users")]
 		public async Task<IActionResult> GetAllUsers() => Ok(await _userService.GetAllUsersAsync());
-	}
+
+		[HttpPut("{id}")]
+        public async Task<ActionResult<UserDto>> Update(int id, [FromBody] UpdateUserDto dto)
+        {
+            if (id != dto.Id) return BadRequest("ID mismatch between URL and body.");
+
+            var user = await _userService.Update(dto);
+            if (user == null) return NotFound();
+
+            return Ok(user);
+        }
+    }
 }

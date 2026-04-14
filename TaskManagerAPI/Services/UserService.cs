@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
+using TaskManagerAPI.Foundation;
+using TaskManagerAPI.Models;
+using TaskManagerAPI.Repositories;
 
 namespace TaskManagerAPI.Services
 {
@@ -9,12 +12,21 @@ namespace TaskManagerAPI.Services
 	{
 		Task<UserDto?> GetUserByIdAsync(int id);
 		Task<List<UserDto>> GetAllUsersAsync();
-	}
+		Task<UserDto?> Update(UpdateUserDto dto);
+    }
 
 	public class UserService : IUserService
 	{
 		private readonly AppDbContext _context;
-		public UserService(AppDbContext context) => _context = context;
+        private readonly IUnitOfWork _unitOfWork;
+		public UserService(
+			AppDbContext context,
+			IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+			_context = context;
+
+        }
 
 		public async Task<List<UserDto>> GetAllUsersAsync()
 		{
@@ -52,5 +64,24 @@ namespace TaskManagerAPI.Services
 				Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList()
 			};
 		}
-	}
+
+        public async Task<UserDto?> Update(UpdateUserDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(t => t.Id == dto.Id );
+            if (user == null) return null;
+
+            user.Name= dto.Name;
+            await _unitOfWork.SaveAsync();
+
+            return MapToDto(user);
+        }
+
+        private UserDto MapToDto(User m) => new UserDto
+        {
+            Id = m.Id,
+            Name = m.Name,
+            Email = m.Email,
+            Roles = m.UserRoles.Select(ur => ur.Role.Name).ToList()
+        };
+    }
 }

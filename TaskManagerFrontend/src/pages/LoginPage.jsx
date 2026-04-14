@@ -55,6 +55,7 @@ export default function LoginPage() {
 			navigate('/dashboard');
 		} catch (err) {
 			// MODIFIED — Improved error extraction from Axios
+			console.error(err)
 			const message = err.response?.data?.message || err.response?.data || 'Invalid credentials';
 			showToast(message, 'error'); // This will now show because the page won't refresh!
 		} finally {

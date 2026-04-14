@@ -7,6 +7,8 @@ import { useLoading } from './useLoading';
 
 export const useCompany = () => {
 	const [companies, setCompanies] = useState([]);
+	const [selectedCompany, setSelectedCompany] = useState(null);
+
 
 	const { showToast } = useToast();
 	const { loading, showLoading, hideLoading } = useLoading();
@@ -36,7 +38,7 @@ export const useCompany = () => {
 				await companyService.create(formData);
 				showToast("Company created successfully", "success");
 			}
-			
+
 			await fetchCompanies();
 			return true;
 		} catch (err) {
@@ -65,5 +67,13 @@ export const useCompany = () => {
 		fetchCompanies();
 	}, [fetchCompanies]);
 
-	return { companies, loading, saveCompany, deleteCompany, fetchCompanies };
+	return {
+		companies,
+		selectedCompany,
+		loading,
+		setSelectedCompany,
+		saveCompany,
+		deleteCompany,
+		fetchCompanies
+	};
 };

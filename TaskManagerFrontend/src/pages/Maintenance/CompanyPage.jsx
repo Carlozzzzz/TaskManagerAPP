@@ -12,12 +12,11 @@ import CompanyAddEditForm from '../../components/modules/Maintenance/Company/Com
 import { usePermissions } from '../../hooks/usePermissions';
 
 export default function CompanyPage() {
-	const { companies, loading, saveCompany, deleteCompany } = useCompany();
+	const { companies, selectedCompany, loading, setSelectedCompany, saveCompany, deleteCompany } = useCompany();
 	const { askConfirm } = useConfirm();
 	const { canAdd, canEdit, canDelete } = usePermissions('companies');
 
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [selectedCompany, setSelectedCompany] = useState(null);
 
 	const handleOpenModal = (company = null) => {
 		setSelectedCompany(company);

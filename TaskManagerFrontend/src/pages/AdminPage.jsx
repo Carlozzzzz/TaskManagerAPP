@@ -8,8 +8,7 @@ export default function AdminPage() {
 	const [activeTab, setActiveTab] = useState('tasks');
 
 	const { allTasks, loading } = useTasks();
-	const allUsers = [];
-	// const { allUsers } = useUsers();
+	const { allUsers } = useUsers();
 
 	const STATUS_STYLES = {
 		todo: 'bg-gray-100 text-gray-600',

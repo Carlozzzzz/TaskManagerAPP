@@ -13,4 +13,10 @@ namespace TaskManagerAPI.DTOs
 		// MODIFIED: From 'string' to 'List<string>' to support RBAC
 		public List<string> Roles { get; set; } = new();
 	}
+
+    public class UpdateUserDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
 }
