@@ -18,7 +18,8 @@ const modulePermissionsRaw = {
 		items: [
 			{ name: 'Company', to: '/company', moduleKey: 'COMPANY', hasAccess: true },
 			{ name: 'Client', to: '/client', moduleKey: 'CLIENT', hasAccess: true },
-			{ name: 'Department', to: '/department', moduleKey: 'DEPT', hasAccess: false }
+			{ name: 'Department', to: '/department', moduleKey: 'DEPARTMENT', hasAccess: false },
+			{ name: 'Position', to: '/position', moduleKey: 'POSITION', hasAccess: false },
 		]
 	},
 	DevMode: {

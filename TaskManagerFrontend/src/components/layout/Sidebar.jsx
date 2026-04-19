@@ -51,8 +51,6 @@ export default function Sidebar() {
     ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
     md:sticky top-0 h-screen
   `;
-  
-  console.log(user)
 
 	return (
 		<>
