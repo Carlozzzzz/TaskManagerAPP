@@ -31,7 +31,8 @@ namespace TaskManagerAPI.DTOs
 
     public class CreateRolePermissionDto
     {
-        public int ModuleId { get; set; }
+        // MODIFIED: Added ModuleKey as the primary identifier from Frontend
+        public string ModuleKey { get; set; } = null!;
         public bool CanView { get; set; }
         public bool CanAdd { get; set; }
         public bool CanEdit { get; set; }

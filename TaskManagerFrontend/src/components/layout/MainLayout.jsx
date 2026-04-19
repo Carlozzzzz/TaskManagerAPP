@@ -13,8 +13,8 @@ export default function MainLayout() {
 				<div className="flex flex-1 flex-col overflow-hidden">
 					<Topbar />
 					
-					<main className="flex-1 overflow-y-auto bg-gray-50 p-4 px-6">
-						<div className="mx-auto w-full max-w-[1600px]">
+					<main className="flex-1 overflow-y-auto bg-gray-50 p-4">
+						<div className="mx-auto w-full max-w-[1600px] rounded-lg bg-white p-4 shadow-md">
 							<Outlet />
 						</div>
 					</main>

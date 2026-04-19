@@ -5,25 +5,18 @@
 namespace TaskManagerAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Remove_IdUserRole_Model : Migration
+    public partial class DisableIdentityCache : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Id",
-                table: "UserRoles");
+            migrationBuilder.Sql("ALTER DATABASE SCOPED CONFIGURATION SET IDENTITY_CACHE = OFF;", suppressTransaction: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "Id",
-                table: "UserRoles",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.Sql("ALTER DATABASE SCOPED CONFIGURATION SET IDENTITY_CACHE = ON;", suppressTransaction: true);
         }
     }
 }

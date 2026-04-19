@@ -16,7 +16,7 @@ export default function DataTable({
 	return (
 		<div className="w-full overflow-hidden">
 			<table className="w-full border-collapse text-left">
-				<thead className="border-b border-slate-100 bg-[#F9FAFB]">
+				<thead className="border-b border-slate-100 bg-[#f6f8f9]">
 					<tr>
 						{columns.map((col, idx) => (
 							<th key={idx} className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
@@ -41,7 +41,7 @@ export default function DataTable({
 						data.map((row, rIdx) => (
 							<tr key={rIdx} className="group transition-colors hover:bg-blue-50/20">
 								{columns.map((col, cIdx) => (
-									<td key={cIdx} className="px-6 py-4 text-sm font-medium text-slate-600">
+									<td key={cIdx} className="font-sm px-6 py-4 text-sm text-slate-500">
 										{col.render ? col.render(row[col.accessor], row) : row[col.accessor]}
 									</td>
 								))}

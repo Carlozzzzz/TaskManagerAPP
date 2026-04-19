@@ -10,6 +10,8 @@ import Modal from '../../components/ui/Modal';
 import { Add, Edit, Delete, PictureAsPdf } from '@mui/icons-material';
 import CompanyAddEditForm from '../../components/modules/Maintenance/Company/CompanyAddEditForm';
 import { usePermissions } from '../../hooks/usePermissions';
+import PageTitle from '../../components/ui/PageTitle';
+import Breadcrumb from '../../components/ui/Breadcrumb';
 
 export default function CompanyPage() {
 	const { companies, selectedCompany, loading, setSelectedCompany, saveCompany, deleteCompany } = useCompany();
@@ -28,7 +30,7 @@ export default function CompanyPage() {
 			title: 'Update Company?',
 			message: 'Are you sure you want to proceed?'
 		});
-		
+
 		if (isOk) {
 			const success = await saveCompany(formData, selectedCompany?.id);
 			if (success) setIsModalOpen(false);
@@ -78,20 +80,19 @@ export default function CompanyPage() {
 			onClick: (row) => handleDeleteRequest(row) // Calls the async handler
 		}] : [])
 	];
-
 	return (
-		<div className="space-y-6 rounded-lg bg-white p-4">
+		<div className="space-y-3 rounded-lg bg-white">
+			<Breadcrumb section="Maintenance" page="Company" />
 			<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-				<div>
-					<h1 className="text-2xl font-bold tracking-tight text-slate-500">Companies</h1>
-					<p className="text-sm font-medium tracking-tight text-slate-400">Manage corporate identities and legal status</p>
-				</div>
+
+				<PageTitle title="Companies" />
+
 				{canAdd && (
 					<Button
 						name="New"
 						icon={<Add sx={{ fontSize: 18 }} />}
 						onClick={() => handleOpenModal()}
-						className="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-blue-100"
+						className="bg-blue-600 text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-blue-100"
 					/>
 				)}
 			</div>

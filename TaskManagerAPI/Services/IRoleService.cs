@@ -8,6 +8,7 @@ namespace TaskManagerAPI.Services
         Task<List<RoleWithPermissionsDto>> GetAllRolesAsync();
         Task<RoleWithPermissionsDto?> GetRoleByIdAsync(int id);
         Task<RoleWithPermissionsDto> CreateRoleAsync(CreateRoleDto dto);
+        Task<RoleWithPermissionsDto> UpdateRoleAsync(int id, CreateRoleDto dto);
         Task<bool> DeleteRoleAsync(int id);
     }
 }

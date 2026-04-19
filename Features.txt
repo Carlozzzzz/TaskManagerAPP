@@ -1,0 +1,19 @@
+Must Have Features: Generic
+
+Theme :: configurable
+Lock Account :: via geolocation
+Database Backup
+Permission access :: via role management
+Cloud/On-Premise :: existing, improve this
+Flagging of features
+ClientIdentity
+DevMode :: backend dynamic configuration
+Automatic logs
+Caching :: for faster loading, reduce request
+Separate File storage :: avoid saving on DB
+proper authentication :: jwt, cookies for login credentials
+
+
+Typescript :: for frontend datatype safety
+
+Backend, Frontend :: Senior Dev workflow

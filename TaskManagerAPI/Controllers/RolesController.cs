@@ -35,6 +35,18 @@ namespace TaskManagerAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
+        [HttpPut("{id}")]
+        public async Task<ActionResult<RoleWithPermissionsDto>> Update(int id, [FromBody] CreateRoleDto dto)
+        {
+            //if (id != dto.Id) return BadRequest("ID mismatch");
+
+            var result = await _roleService.UpdateRoleAsync(id, dto);
+
+            if (result == null) return NotFound();
+
+            return Ok(result);
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

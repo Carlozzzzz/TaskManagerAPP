@@ -45,7 +45,7 @@ export default function TaskForm({ onSubmit, loading }) {
 		setFieldErrors(prev => ({ ...prev, [field]: undefined }));
 
 	return (
-		<form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+		<form onSubmit={handleSubmit} className="rounded-lg border border-gray-200 bg-gray-100 bg-gray-50 p-4 shadow-sm">
 			<h2 className="mb-3 font-medium text-gray-700">Add New Task</h2>
 
 			<div className="flex flex-col gap-3">

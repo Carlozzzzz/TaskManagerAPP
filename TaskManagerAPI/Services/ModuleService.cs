@@ -1,80 +1,79 @@
-﻿// --- FILE 3: Services/ModuleService.cs ---
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using TaskManagerAPI.Data;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Foundation;
 using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.Services
 {
+    
+
     public class ModuleService : IModuleService
     {
-        private readonly IRepository<Module> _repository;
+        private readonly AppDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ModuleService(IRepository<Module> repository, IUnitOfWork unitOfWork)
+        public ModuleService(AppDbContext context, IUnitOfWork unitOfWork)
         {
-            _repository = repository;
+            _context = context;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ModuleDto>> GetAllAsync()
+        public async Task<List<Module>> GetAllModulesAsync()
         {
-            var modules = await _repository.GetAllAsync();
-            return modules.Select(MapToDto).ToList();
+            return await _context.Modules
+                .Where(m => !m.IsDeleted)
+                .ToListAsync();
         }
 
-        public async Task<ModuleDto?> GetByIdAsync(int id)
+        public async Task SyncModulesAsync(List<SyncModuleDto> incomingModules)
         {
-            var m = await _repository.GetByIdAsync(id);
-            return m == null ? null : MapToDto(m);
-        }
-
-        public async Task<ModuleDto> CreateAsync(CreateModuleDto dto)
-        {
-            var entity = new Module
+            await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                Key = dto.Key,
-                DisplayName = dto.DisplayName,
-                Section = dto.Section
-            };
+                var dbModules = await _context.Modules.ToListAsync();
 
-            await _repository.AddAsync(entity);
-            await _unitOfWork.SaveAsync();
+                foreach (var incoming in incomingModules)
+                {
+                    var existing = dbModules.FirstOrDefault(m => m.Key == incoming.Key);
 
-            return MapToDto(entity);
+                    if (existing != null)
+                    {
+                        // // REPLACED: Update metadata only, preserve the record
+                        existing.DisplayName = incoming.DisplayName;
+                        existing.Section = incoming.Section;
+                        existing.IsDeleted = false;
+                    }
+                    else
+                    {
+                        // // ADDED: Only insert if it doesn't exist
+                        _context.Modules.Add(new Module
+                        {
+                            Key = incoming.Key,
+                            DisplayName = incoming.DisplayName,
+                            Section = incoming.Section,
+                            IsDeleted = false
+                        });
+                    }
+                }
+
+                // Optional: Soft-delete modules that are NOT in the incoming frontend config
+                var incomingKeys = incomingModules.Select(m => m.Key).ToList();
+                var removedModules = dbModules.Where(m => !incomingKeys.Contains(m.Key)).ToList();
+                foreach (var removed in removedModules)
+                {
+                    removed.IsDeleted = true;
+                }
+
+                await _unitOfWork.SaveAsync();
+                await _unitOfWork.CommitAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+                throw;
+            }
         }
-
-        // ADDED: Update Implementation
-        public async Task<ModuleDto?> UpdateAsync(UpdateModuleDto dto)
-        {
-            var m = await _repository.GetByIdAsync(dto.Id);
-            if (m == null) return null;
-
-            // Update tracked entity properties
-            m.Key = dto.Key;
-            m.DisplayName = dto.DisplayName;
-            m.Section = dto.Section;
-
-            await _unitOfWork.SaveAsync(); // Triggers Audit & Persistence
-            return MapToDto(m);
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var m = await _repository.GetByIdAsync(id);
-            if (m == null) return false;
-
-            m.IsDeleted = true;
-            await _unitOfWork.SaveAsync();
-            return true;
-        }
-
-        // Clean mapping helper
-        private ModuleDto MapToDto(Module m) => new ModuleDto
-        {
-            Id = m.Id,
-            Key = m.Key,
-            DisplayName = m.DisplayName,
-            Section = m.Section
-        };
     }
 }

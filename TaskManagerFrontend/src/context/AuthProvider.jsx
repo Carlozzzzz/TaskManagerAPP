@@ -38,10 +38,11 @@ export function AuthProvider({ children }) {
 	// 2. LOGIN LOGIC
 	const login = (data) => {
 		localStorage.setItem('token', data.token);
-		localStorage.setItem('user', JSON.stringify({ name: data.name, role: data.role }));
+		localStorage.setItem('user', JSON.stringify({ name: data.name, role: data.role, permissions: data.permissions }));
 
 		setToken(data.token);
-		setUser({ name: data.name, role: data.role });
+		console.log({data})
+		setUser({ name: data.name, role: data.role, permissions: data.permissions });
 
 		// ADDED: Ensure loading is false after login
 		setLoading(false);

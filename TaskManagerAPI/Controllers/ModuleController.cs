@@ -1,5 +1,4 @@
-﻿// --- FILE 4: Controllers/ModulesController.cs ---
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagerAPI.DTOs;
 using TaskManagerAPI.Services;
@@ -17,41 +16,19 @@ namespace TaskManagerAPI.Controllers
             => _moduleService = moduleService;
 
         [HttpGet]
-        public async Task<ActionResult<List<ModuleDto>>> GetAll()
-            => Ok(await _moduleService.GetAllAsync());
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ModuleDto>> GetById(int id)
+        public async Task<IActionResult> GetAll()
         {
-            var result = await _moduleService.GetByIdAsync(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+            return Ok(await _moduleService.GetAllModulesAsync());
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ModuleDto>> Create(CreateModuleDto dto)
+        [HttpPost("sync")]
+        public async Task<IActionResult> Sync([FromBody] List<SyncModuleDto> modules)
         {
-            var result = await _moduleService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-        }
+            if (modules == null || !modules.Any())
+                return BadRequest("Module list cannot be empty.");
 
-        // ADDED: PUT Endpoint
-        [HttpPut("{id}")]
-        public async Task<ActionResult<ModuleDto>> Update(int id, UpdateModuleDto dto)
-        {
-            if (id != dto.Id) return BadRequest("ID mismatch.");
-
-            var result = await _moduleService.UpdateAsync(dto);
-            if (result == null) return NotFound();
-
-            return Ok(result);
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var success = await _moduleService.DeleteAsync(id);
-            return success ? NoContent() : NotFound();
+            await _moduleService.SyncModulesAsync(modules);
+            return Ok(new { message = "Modules synchronized successfully." });
         }
     }
 }

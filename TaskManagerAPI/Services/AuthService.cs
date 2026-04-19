@@ -23,41 +23,45 @@ namespace TaskManagerAPI.Services
 	{
 		private readonly AppDbContext _context;
 		private readonly IConfiguration _config;
+		private readonly IRoleService _roleService;
 
-		public AuthService(AppDbContext context, IConfiguration config)
+		public AuthService(AppDbContext context, IConfiguration config, IRoleService roleService)
 		{
 			_context = context;
 			_config = config;
+			_roleService = roleService;
 		}
 
-		public async Task<AuthResponseDto?> RegisterAsync(RegisterDto dto)
-		{
-			if (await _context.Users.AnyAsync(u => u.Email == dto.Email)) return null;
+        // MODIFIED: Snippet inside RegisterAsync
+        public async Task<AuthResponseDto?> RegisterAsync(RegisterDto dto)
+        {
+            if (await _context.Users.AnyAsync(u => u.Email == dto.Email)) return null;
 
-			var user = new User
-			{
-				Name = dto.Name,
-				Email = dto.Email,
-				PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
-			};
+            var user = new User
+            {
+                Name = dto.Name,
+                Email = dto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            };
 
-			// NEW: Assign Role based on DB lookup
-			var isFirstUser = !await _context.Users.IgnoreQueryFilters().AnyAsync();
-			var roleName = isFirstUser ? UserRoles.Admin : UserRoles.User;
-			var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+            // // MODIFIED: Logic to detect first user
+            var isFirstUser = !await _context.Users.IgnoreQueryFilters().AnyAsync();
+            var roleName = isFirstUser ? "Admin" : "User";
 
-			if (role != null)
-			{
-				user.UserRoles.Add(new UserRole { RoleId = role.Id });
-			}
+            // // MODIFIED: Find existing role from Seeder
+            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+            if (role != null)
+            {
+                user.UserRoles.Add(new UserRole { RoleId = role.Id });
+            }
 
-			_context.Users.Add(user);
-			await _context.SaveChangesAsync();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
-			return await LoginAsync(new LoginDto { Email = dto.Email, Password = dto.Password });
-		}
+            return await LoginAsync(new LoginDto { Email = dto.Email, Password = dto.Password });
+        }
 
-		public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
+        public async Task<AuthResponseDto?> LoginAsync(LoginDto dto)
 		{
 			var user = await _context.Users
 					.Include(u => u.UserRoles)
@@ -70,13 +74,13 @@ namespace TaskManagerAPI.Services
 				return null;
 
 			var permissions = ResolvePermissions(user);
-			var role = user.UserRoles.Select(ur => ur.Role.Name).First();
+            var roleName = user.UserRoles.Select(ur => ur.Role?.Name).FirstOrDefault() ?? "No Role Assigned";
 
-			return new AuthResponseDto
+            return new AuthResponseDto
 			{
-				Token = GenerateToken(user, role),
+				Token = GenerateToken(user, roleName),
 				Name = user.Name,
-				Role = role,
+				Role = roleName,
 				Permissions = permissions
 			};
 		}
@@ -101,7 +105,10 @@ namespace TaskManagerAPI.Services
         // THE FLATTENER: Squashes multiple roles into additive permissions
         private List<PermissionDto> ResolvePermissions(User user)
 		{
-			return user.UserRoles
+            if (user.UserRoles == null || !user.UserRoles.Any())
+                return new List<PermissionDto>();
+
+            return user.UserRoles
 					.SelectMany(ur => ur.Role.Permissions)
 					.GroupBy(p => p.Module.Key)
 					.Select(g => new PermissionDto

@@ -173,4 +173,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+// Place this right before app.Run();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<TaskManagerAPI.Data.AppDbContext>();
+
+    // This is the trigger. It runs, checks the DB, sees data exists, and stops.
+    await TaskManagerAPI.Data.DbInitializer.SeedAsync(context);
+}
+
 app.Run();

@@ -1,9 +1,10 @@
 // src/components/layout/Sidebar.jsx
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useLayout } from '../../context/LayoutContext'; // ADDED
+import { useLayout } from '../../context/LayoutContext';
 import NavItem from './NavItem';
 import NavDropdown from './NavDropdown';
+import { getAccessibleSidebar } from '../../utils/permissionUtils'; // ADDED
 
 import {
 	HomeRounded,
@@ -13,13 +14,28 @@ import {
 	AssignmentRounded,
 	SecurityRounded,
 	ChevronLeftRounded,
-	CloseRounded
+	CloseRounded,
+	HelpOutlineRounded
 } from '@mui/icons-material';
 
+const ICON_MAP = {
+	home: HomeRounded,
+	maintenance: BuildCircleRounded,
+	dev: TerminalRounded,
+	tasks: AssignmentRounded,
+	users: GroupRounded,
+	admin: SecurityRounded,
+};
+
 export default function Sidebar() {
-	const { user } = useAuth();
-	// MODIFIED: Consuming shared state instead of local state
+	const { user } = useAuth(); // Assuming user.permissions exists here
 	const { isCollapsed, isMobileOpen, toggleSidebar, toggleMobile, closeMobile } = useLayout();
+
+	// MODIFIED: Compute the dynamic sidebar whenever user permissions change
+	const dynamicSidebar = useMemo(() => {
+		// Pass the user's permission array to the utility
+		return getAccessibleSidebar(user?.permissions || []);
+	}, [user]);
 
 	useEffect(() => {
 		const handleResize = () => {
@@ -35,10 +51,11 @@ export default function Sidebar() {
     ${isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
     md:sticky top-0 h-screen
   `;
+  
+  console.log(user)
 
 	return (
 		<>
-			{/* Mobile Overlay */}
 			{isMobileOpen && (
 				<div
 					className="fixed inset-0 z-40 bg-gray-900/30 backdrop-blur-[2px] transition-opacity md:hidden"
@@ -65,39 +82,33 @@ export default function Sidebar() {
 				</div>
 
 				<nav className="flex-1 space-y-2 overflow-y-auto p-4">
-					<NavItem to="/dashboard" icon={HomeRounded} label="Home" isCollapsed={isCollapsed} />
+					{Object.entries(dynamicSidebar).map(([category, config]) => {
+						const IconComponent = ICON_MAP[config.icon] || HelpOutlineRounded;
 
-					<NavDropdown
-						icon={BuildCircleRounded}
-						label="Maintenance"
-						isCollapsed={isCollapsed}
-						items={[
-							{ label: 'Company', to: '/company' },  // Add your link here
-							{ label: 'Client', to: '/client' },
-							{ label: 'Department', to: '/department' }
-						]}
-					/>
+						// Standalone Item (e.g. Home, Admin)
+						if (config.isStandalone) {
+							return (
+								<NavItem
+									key={category}
+									to={config.items[0].to}
+									icon={IconComponent}
+									label={category}
+									isCollapsed={isCollapsed}
+								/>
+							);
+						}
 
-					<NavDropdown
-						icon={TerminalRounded}
-						label="Dev Mode"
-						isCollapsed={isCollapsed}
-						items={[
-							{ label: 'Client Identity' },
-							{ label: 'Night Diff' }
-						]}
-					/>
-
-
-					<NavItem to="/users" icon={GroupRounded} label="Users" isCollapsed={isCollapsed} />
-
-					<div className={`my-4 border-t border-gray-100 ${isCollapsed ? 'mx-2' : 'mx-0'}`} />
-
-					<NavItem to="/tasks" icon={AssignmentRounded} label="My Tasks" isCollapsed={isCollapsed} />
-
-					{user?.role === 'Admin' && (
-						<NavItem to="/admin" icon={SecurityRounded} label="Admin Panel" isCollapsed={isCollapsed} />
-					)}
+						// Dropdown Item (e.g. Maintenance)
+						return (
+							<NavDropdown
+								key={category}
+								icon={IconComponent}
+								label={category}
+								isCollapsed={isCollapsed}
+								items={config.items.map(i => ({ label: i.name, to: i.to }))}
+							/>
+						);
+					})}
 				</nav>
 			</aside>
 		</>

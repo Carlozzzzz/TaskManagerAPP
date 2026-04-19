@@ -5,14 +5,14 @@ export default function Button({
 	name,
 	icon: Icon,
 	onClick,
-	variant = 'primary',
+	variant = 'success',
 	className = '',
 	disabled = false,
 	type = "button", // Added type for form handling
 	...props
 }) {
 	const variants = {
-		// REPLACED: Updated to match Compact Blue theme
+		success: "bg-green-500 hover:bg-green-600 text-white shadow-md shadow-green-100 uppercase tracking-widest text-[10px]",
 		primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100 uppercase tracking-widest text-[10px]",
 		secondary: "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm uppercase tracking-widest text-[10px]",
 		danger: "bg-red-500 hover:bg-red-600 text-white shadow-md shadow-red-100 uppercase tracking-widest text-[10px]",
@@ -25,10 +25,10 @@ export default function Button({
 			type={type}
 			disabled={disabled}
 			onClick={onClick}
-			className={`flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-black transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${variants[variant]} ${className}`}
+			className={`flex items-center justify-center gap-1 px-4 p-2.5 rounded-lg font-black transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${variants[variant]} ${className}`}
 			{...props}
 		>
-			{Icon && <span className="shrink-0 text-sm">{Icon}</span>}
+			{Icon && <span className="flex shrink-0 items-center justify-center p-0 text-sm">{Icon}</span>}
 			{name}
 		</button>
 	);

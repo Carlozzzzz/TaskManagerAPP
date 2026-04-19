@@ -12,8 +12,8 @@ using TaskManagerAPI.Data;
 namespace TaskManagerAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260413131749_update_UserTable")]
-    partial class update_UserTable
+    [Migration("20260419034353_DisableIdentityCache")]
+    partial class DisableIdentityCache
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
