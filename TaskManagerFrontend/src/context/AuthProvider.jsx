@@ -41,7 +41,6 @@ export function AuthProvider({ children }) {
 		localStorage.setItem('user', JSON.stringify({ name: data.name, role: data.role, permissions: data.permissions }));
 
 		setToken(data.token);
-		console.log({data})
 		setUser({ name: data.name, role: data.role, permissions: data.permissions });
 
 		// ADDED: Ensure loading is false after login

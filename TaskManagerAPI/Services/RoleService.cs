@@ -21,13 +21,36 @@ namespace TaskManagerAPI.Services
             _context = context;
         }
 
-        public async Task<List<RoleWithPermissionsDto>> GetAllRolesAsync()
+        public async Task<List<RoleDto>> GetAllRolesAsync()
+        {
+            var roles = await _roleRepo.GetAllAsync();
+
+            return roles.Select(c => new RoleDto
+            {
+                Id = c.Id,
+                Name = c.Name
+            }).ToList();
+        }
+
+        public async Task<RoleDto?> GetRoleByIdAsync(int id)
+        {
+            var roles = await _roleRepo.GetByIdAsync(id);
+            if (roles == null) return null;
+
+            return new RoleDto
+            {
+                Id = roles.Id,
+                Name = roles.Name,
+            };
+        }
+
+        public async Task<List<RoleWithPermissionsDto>> GetAllRolesWithPermissionsAsync()
         {
             var roles = await _roleRepo.GetAllRolesWithPermissionsAsync();
             return roles.Select(MapToDto).ToList();
         }
 
-        public async Task<RoleWithPermissionsDto?> GetRoleByIdAsync(int id)
+        public async Task<RoleWithPermissionsDto?> GetRoleByIdWithPermissionsAsync(int id)
         {
             var role = await _roleRepo.GetRoleWithPermissionsAsync(id);
             return role == null ? null : MapToDto(role);
@@ -74,6 +97,7 @@ namespace TaskManagerAPI.Services
 
                 await _unitOfWork.CommitAsync();
 
+                // MODIFIED: Explicitly re-fetch with Includes to ensure the DTO is fully populated
                 var updatedRole = await _roleRepo.GetRoleWithPermissionsAsync(role.Id);
                 return MapToDto(updatedRole!);
             }
@@ -145,6 +169,6 @@ namespace TaskManagerAPI.Services
                     CanDelete = p.CanDelete
                 }).ToList()
             };
-        }
+        }        
     }
 }

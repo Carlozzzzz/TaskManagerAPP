@@ -20,8 +20,22 @@ import SyncIcon from '@mui/icons-material/Sync';
 import { useToast } from '../hooks/useToast';
 
 export default function UserPage() {
-	const { allUsers, selectedUser, loading: usersLoading, setSelectedUser, updateUser, resetUserPassword } = useUsers();
-	const { roles, dbModules, loading: rolesLoading, fetchRolesAndModules, saveRole } = useRoles(); // ADDED
+	const {
+		allUsers,
+		selectedUser,
+		loading: usersLoading,
+		setSelectedUser,
+		updateUser,
+		resetUserPassword } = useUsers();
+	const {
+		roles,
+		rolePermissions,
+		selectedRole, setSelectedRole,
+		dbModules,
+		loading: rolesLoading,
+		fetchRolesAndModules,
+		fetchRolePermission,
+		saveRole } = useRoles(); // ADDED
 	const { askConfirm } = useConfirm();
 	const { showToast } = useToast();
 
@@ -31,7 +45,7 @@ export default function UserPage() {
 	// ADDED: Role Modal States
 	const [isRoleListModalOpen, setIsRoleListModalOpen] = useState(false);
 	const [isRoleEntryModalOpen, setIsRoleEntryModalOpen] = useState(false);
-	const [selectedRole, setSelectedRole] = useState(null);
+	// const [selectedRole, setSelectedRole] = useState(null);
 
 	// --- USER HANDLERS ---
 	const handleOpenAddEditModal = (user) => {
@@ -78,8 +92,18 @@ export default function UserPage() {
 
 	const handleOpenRoleEntry = (role = null) => {
 		setSelectedRole(role);
+
+		if (role) {
+			// Fetch fresh permissions from API for the selected role
+			fetchRolePermission(role.id);
+		} else {
+			// Clear permissions state for "Create New" mode
+			fetchRolePermission(null);
+		}
+
 		setIsRoleEntryModalOpen(true);
 	};
+
 
 	const handleRoleSubmit = async (formData) => {
 		const isOk = await askConfirm({
@@ -228,15 +252,27 @@ export default function UserPage() {
 				footer={
 					<>
 						<Button variant="ghost" name="Back" onClick={() => setIsRoleEntryModalOpen(false)} />
-						<Button type="submit" form="role-form" variant="primary" name="Save Permissions" />
+						{/* ADDED: Disable save button while loading permissions */}
+						<Button
+							type="submit"
+							form="role-form"
+							variant="primary"
+							name="Save Permissions"
+							disabled={rolesLoading}
+						/>
 					</>
 				}
 			>
-				<RoleAddEditForm
-					initialData={selectedRole}
-					dbModules={dbModules}
-					onSubmit={handleRoleSubmit}
-				/>
+				{/* MODIFIED: Ensure we pass a loading indicator if the data isn't ready yet */}
+				{rolesLoading && selectedRole ? (
+					<div className="p-10 text-center">Loading Permissions...</div>
+				) : (
+					<RoleAddEditForm
+						initialData={rolePermissions} // This now gets fresh data from the fetch
+						dbModules={dbModules}
+						onSubmit={handleRoleSubmit}
+					/>
+				)}
 			</Modal>
 		</div>
 	);

@@ -28,6 +28,18 @@ namespace TaskManagerAPI.Controllers
             return Ok(role);
         }
 
+        [HttpGet("with-role-permissions")]
+        public async Task<ActionResult<List<RoleWithPermissionsDto>>> GetAllWithPermissions()
+            => Ok(await _roleService.GetAllRolesWithPermissionsAsync());
+
+        [HttpGet("{id}/with-role-permissions")]
+        public async Task<ActionResult<RoleWithPermissionsDto>> GetByIdWithPermissions(int id)
+        {
+            var role = await _roleService.GetRoleByIdWithPermissionsAsync(id);
+            if (role == null) return NotFound();
+            return Ok(role);
+        }
+
         [HttpPost]
         public async Task<ActionResult<RoleWithPermissionsDto>> Create(CreateRoleDto dto)
         {

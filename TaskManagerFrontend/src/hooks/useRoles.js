@@ -1,5 +1,5 @@
 // src/hooks/useRoles.js
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { roleService } from '../services/roleService';
 import { moduleService } from '../services/moduleService';
 import { useLoading } from './useLoading';
@@ -7,11 +7,16 @@ import { useToast } from './useToast';
 
 export function useRoles() {
 	const [roles, setRoles] = useState([]);
-	const [dbModules, setDbModules] = useState([]); // Needed for ID mapping
+	const [rolePermissions, setRolePermissions] = useState([]);
+
+	const [selectedRole, setSelectedRole] = useState([]);
+
+	const [dbModules, setDbModules] = useState([]); // Needed for ID mapping, to be remove
+
 	const { loading, showLoading, hideLoading } = useLoading();
 	const { showToast } = useToast();
 
-	const fetchRolesAndModules = useCallback(async () => {
+	const fetchRolesAndModules = useCallback(async () => { // to be removed
 		showLoading();
 		try {
 			const [rolesData, modulesData] = await Promise.all([
@@ -21,14 +26,44 @@ export function useRoles() {
 			setRoles(rolesData);
 			setDbModules(modulesData);
 
-			console.log({ rolesData, modulesData });
-
 		} catch (err) {
 			showToast("Failed to load role data", "error");
 		} finally {
 			hideLoading();
 		}
 	}, []);
+
+	const fetchRoles = useCallback(async () => {
+		showLoading();
+		try {
+			const rolesData = await roleService.getAll();
+			setRoles(rolesData);
+		} catch (err) {
+			showToast("Failed to load role data", "error");
+			console.error("Error: ", err)
+		} finally {
+			hideLoading();
+		}
+	}, [showLoading, hideLoading, showToast]);
+
+	const fetchRolePermission = useCallback(async (id) => {
+		if (!id) {
+			setRolePermissions(null); // Clear for "New Role" mode
+			return;
+		}
+
+		showLoading();
+		try {
+			const rolePermissionsData = await roleService.getByIdWithPermissions(id);
+			setRolePermissions(rolePermissionsData);
+			return rolePermissionsData; // ADDED: Return data for immediate use if needed
+		} catch (err) {
+			showToast("Failed to load role permissions", "error");
+			console.error("Error: ", err);
+		} finally {
+			hideLoading();
+		}
+	}, [showLoading, hideLoading, showToast]);
 
 	const saveRole = async (id, payload) => {
 		showLoading();
@@ -46,5 +81,15 @@ export function useRoles() {
 		}
 	};
 
-	return { roles, dbModules, loading, fetchRolesAndModules, saveRole };
+	return {
+		roles,
+		rolePermissions,
+		selectedRole, setSelectedRole,
+		dbModules,
+		loading,
+		fetchRoles,
+		fetchRolePermission,
+		fetchRolesAndModules,
+		saveRole
+	};
 }
