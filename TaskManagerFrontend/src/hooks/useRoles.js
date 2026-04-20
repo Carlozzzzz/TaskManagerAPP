@@ -28,6 +28,7 @@ export function useRoles() {
 
 		} catch (err) {
 			showToast("Failed to load role data", "error");
+			console.error("Error: ", err)
 		} finally {
 			hideLoading();
 		}

@@ -4,7 +4,7 @@ import DataTable from '../components/ui/DataTable';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
-import { Edit, Delete } from '@mui/icons-material'; // MODIFIED
+import Edit from '@mui/icons-material/Edit'; // MODIFIED
 
 import { useUsers } from '../hooks/useUsers';
 import { useRoles } from '../hooks/useRoles'; // ADDED
@@ -15,9 +15,8 @@ import RoleAddEditForm from '../components/modules/Role/RoleAddEditForm'; // ADD
 import Button from '../components/ui/Button';
 import PageTitle from '../components/ui/PageTitle';
 import Breadcrumb from '../components/ui/Breadcrumb';
-import { moduleService } from '../services/moduleService';
 import SyncIcon from '@mui/icons-material/Sync';
-import { useToast } from '../hooks/useToast';
+import { useModules } from '../hooks/useModules';
 
 export default function UserPage() {
 	const {
@@ -35,9 +34,9 @@ export default function UserPage() {
 		loading: rolesLoading,
 		fetchRolesAndModules,
 		fetchRolePermission,
-		saveRole } = useRoles(); // ADDED
+		saveRole } = useRoles();
+	const { syncModules } = useModules();
 	const { askConfirm } = useConfirm();
-	const { showToast } = useToast();
 
 	// User Modal States
 	const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
@@ -119,20 +118,14 @@ export default function UserPage() {
 	};
 
 	const handleSyncModules = async () => {
-		try {
-			const isOk = await askConfirm({
-				title: 'Sync Modules?',
-				message: 'This will align the database with your current app configuration. Continue?',
-				type: 'warning'
-			});
+		const isOk = await askConfirm({
+			title: 'Sync Modules?',
+			message: 'This will align the database with your current app configuration. Continue?',
+			type: 'warning'
+		});
 
-			if (isOk) {
-				await moduleService.syncWithConfig();
-				showToast("Modules synced with database successfully", "success");
-				fetchRolesAndModules(); // Refresh the list
-			}
-		} catch (err) {
-			showToast("Failed to sync modules", "error");
+		if (isOk) {
+			await syncModules();
 		}
 	};
 
