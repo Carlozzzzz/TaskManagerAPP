@@ -1,12 +1,25 @@
+import { useCallback, useState } from "react";
 import { moduleService } from "../services/moduleService";
 import { useLoading } from "./useLoading";
-import { useRoles } from "./useRoles";
 import { useToast } from "./useToast";
 
 export function useModules() {
-	const { fetchRolesAndModules } = useRoles();
+	const [modules, setModules] = useState(null);
 	const { loading, showLoading, hideLoading } = useLoading();
 	const { showToast } = useToast();
+
+	const fetchModules = useCallback(async () => {
+		showLoading();
+		try {
+			const modulesData = await moduleService.getAllModules();
+			setModules(modulesData);
+		} catch (err) {
+			console.error("Error: ", err)
+			showToast("Error fetching modules", "error")
+		} finally {
+			hideLoading();
+		}
+	}, [showLoading, hideLoading, showToast]);
 
 	const syncModules = async () => {
 		showLoading();
@@ -14,7 +27,7 @@ export function useModules() {
 			await moduleService.syncWithConfig();
 			showToast("Modules synced with database successfully", "success");
 
-			await fetchRolesAndModules();
+			await fetchModules();
 		} catch (err) {
 			showToast("Error saving role", "error");
 			console.error("Error: ", err)
@@ -24,7 +37,9 @@ export function useModules() {
 	};
 
 	return {
+		modules,
 		loading,
+		fetchModules,
 		syncModules,
 	};
 }

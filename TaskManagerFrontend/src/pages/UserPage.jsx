@@ -21,21 +21,19 @@ import { useModules } from '../hooks/useModules';
 export default function UserPage() {
 	const {
 		allUsers,
-		selectedUser,
+		selectedUser, setSelectedUser,
 		loading: usersLoading,
-		setSelectedUser,
 		updateUser,
 		resetUserPassword } = useUsers();
 	const {
 		roles,
 		rolePermissions,
 		selectedRole, setSelectedRole,
-		dbModules,
 		loading: rolesLoading,
-		fetchRolesAndModules,
+		fetchRoles,
 		fetchRolePermission,
 		saveRole } = useRoles();
-	const { syncModules } = useModules();
+	const { modules, loading: dbModulesLoading, fetchModules, syncModules } = useModules();
 	const { askConfirm } = useConfirm();
 
 	// User Modal States
@@ -44,7 +42,6 @@ export default function UserPage() {
 	// ADDED: Role Modal States
 	const [isRoleListModalOpen, setIsRoleListModalOpen] = useState(false);
 	const [isRoleEntryModalOpen, setIsRoleEntryModalOpen] = useState(false);
-	// const [selectedRole, setSelectedRole] = useState(null);
 
 	// --- USER HANDLERS ---
 	const handleOpenAddEditModal = (user) => {
@@ -84,8 +81,11 @@ export default function UserPage() {
 	};
 
 	// --- ADDED: ROLE HANDLERS ---
-	const handleOpenRoleManagement = () => {
-		fetchRolesAndModules();
+	const handleOpenRoleManagement = async() => {
+		await Promise.all([
+			fetchRoles(),
+			fetchModules()
+		]);
 		setIsRoleListModalOpen(true);
 	};
 
@@ -262,7 +262,7 @@ export default function UserPage() {
 				) : (
 					<RoleAddEditForm
 						initialData={rolePermissions} // This now gets fresh data from the fetch
-						dbModules={dbModules}
+						modules={modules}
 						onSubmit={handleRoleSubmit}
 					/>
 				)}

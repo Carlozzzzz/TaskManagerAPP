@@ -9,30 +9,10 @@ export function useRoles() {
 	const [roles, setRoles] = useState([]);
 	const [rolePermissions, setRolePermissions] = useState([]);
 
-	const [selectedRole, setSelectedRole] = useState([]);
-
-	const [dbModules, setDbModules] = useState([]); // Needed for ID mapping, to be remove
+	const [selectedRole, setSelectedRole] = useState(null);
 
 	const { loading, showLoading, hideLoading } = useLoading();
 	const { showToast } = useToast();
-
-	const fetchRolesAndModules = useCallback(async () => { // to be removed
-		showLoading();
-		try {
-			const [rolesData, modulesData] = await Promise.all([
-				roleService.getAll(),
-				moduleService.getAllModules()
-			]);
-			setRoles(rolesData);
-			setDbModules(modulesData);
-
-		} catch (err) {
-			showToast("Failed to load role data", "error");
-			console.error("Error: ", err)
-		} finally {
-			hideLoading();
-		}
-	}, []);
 
 	const fetchRoles = useCallback(async () => {
 		showLoading();
@@ -72,7 +52,7 @@ export function useRoles() {
 			if (id) await roleService.update(id, payload);
 			else await roleService.create(payload);
 			showToast("Role saved successfully", "success");
-			await fetchRolesAndModules();
+			await fetchRoles();
 			return true;
 		} catch (err) {
 			showToast("Error saving role", "error");
@@ -86,11 +66,9 @@ export function useRoles() {
 		roles,
 		rolePermissions,
 		selectedRole, setSelectedRole,
-		dbModules,
 		loading,
 		fetchRoles,
 		fetchRolePermission,
-		fetchRolesAndModules,
 		saveRole
 	};
 }

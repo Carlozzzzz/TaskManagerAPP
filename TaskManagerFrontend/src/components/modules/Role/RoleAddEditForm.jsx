@@ -4,28 +4,28 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { accessType } from '../../../constants/modulePermissions';
 import Button from '../../ui/Button';
 
-export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit }) {
+export default function RoleAddEditForm({ initialData, modules = [], onSubmit }) {
 	// MODIFIED: State for Role Name
 	const [roleName, setRoleName] = useState('');
 
 	// MODIFIED: State now uses moduleKey from DB as the object key
 	const [permissions, setPermissions] = useState({});
 
-	// STEP 1: Group flat dbModules into sections for the UI layout
+	// STEP 1: Group flat modules into sections for the UI layout
 	const groupedModules = useMemo(() => {
-		return dbModules.reduce((acc, mod) => {
+		return modules.reduce((acc, mod) => {
 			const section = mod.section || "General";
 			if (!acc[section]) acc[section] = [];
 			acc[section].push(mod);
 			return acc;
 		}, {});
-	}, [dbModules]);
+	}, [modules]);
 
 	// STEP 2: Hydrate the form state
 	useEffect(() => {
 		// Create a "Zeroed out" permissions map based on all modules in the Database
 		const skeleton = {};
-		dbModules.forEach(mod => {
+		modules.forEach(mod => {
 			skeleton[mod.key] = {
 				canView: false, canAdd: false, canEdit: false, canDelete: false
 			};
@@ -48,7 +48,7 @@ export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit 
 
 		setPermissions(skeleton);
 		setRoleName(initialData?.name || '');
-	}, [initialData, dbModules]);
+	}, [initialData, modules]);
 
 	// HELPER: Toggles a single checkbox
 	const handleCheck = (moduleKey, field) => {
@@ -80,7 +80,7 @@ export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit 
 	// UTILITY: Check every single permission for every module
 	const checkAll = () => {
 		const allChecked = {};
-		dbModules.forEach(mod => {
+		modules.forEach(mod => {
 			allChecked[mod.key] = { canView: true, canAdd: true, canEdit: true, canDelete: true };
 		});
 		setPermissions(allChecked);
