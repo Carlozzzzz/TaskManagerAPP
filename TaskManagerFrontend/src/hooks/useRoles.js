@@ -7,8 +7,8 @@ import { useToast } from './useToast';
 
 export function useRoles() {
 	const [roles, setRoles] = useState([]);
-	const [rolePermissions, setRolePermissions] = useState([]);
 
+	const [rolePermissions, setRolePermissions] = useState(null);
 	const [selectedRole, setSelectedRole] = useState(null);
 
 	const { loading, showLoading, hideLoading } = useLoading();
@@ -28,23 +28,22 @@ export function useRoles() {
 	}, [showLoading, hideLoading, showToast]);
 
 	const fetchRolePermission = useCallback(async (id) => {
-		if (!id) {
-			setRolePermissions(null); // Clear for "New Role" mode
-			return;
-		}
-
 		showLoading();
 		try {
-			const rolePermissionsData = await roleService.getByIdWithPermissions(id);
-			setRolePermissions(rolePermissionsData);
-			return rolePermissionsData; // ADDED: Return data for immediate use if needed
+			const data = await roleService.getByIdWithPermissions(id);
+			setRolePermissions(data);
+			return data;
 		} catch (err) {
-			showToast("Failed to load role permissions", "error");
-			console.error("Error: ", err);
+			showToast("Failed to load permissions", "error");
 		} finally {
 			hideLoading();
 		}
 	}, [showLoading, hideLoading, showToast]);
+
+	const clearRoleSelection = useCallback(() => {
+		setSelectedRole(null);
+		setRolePermissions(null);
+	}, []);
 
 	const saveRole = async (id, payload) => {
 		showLoading();
@@ -65,10 +64,12 @@ export function useRoles() {
 	return {
 		roles,
 		rolePermissions,
-		selectedRole, setSelectedRole,
+		selectedRole,
+		setSelectedRole,
 		loading,
 		fetchRoles,
 		fetchRolePermission,
+		clearRoleSelection,
 		saveRole
 	};
 }

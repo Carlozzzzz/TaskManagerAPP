@@ -24,7 +24,8 @@ export default function UserPage() {
 		selectedUser, setSelectedUser,
 		loading: usersLoading,
 		updateUser,
-		resetUserPassword } = useUsers();
+		resetUserPassword
+	} = useUsers();
 	const {
 		roles,
 		rolePermissions,
@@ -32,7 +33,9 @@ export default function UserPage() {
 		loading: rolesLoading,
 		fetchRoles,
 		fetchRolePermission,
-		saveRole } = useRoles();
+		clearRoleSelection,
+		saveRole
+	} = useRoles();
 	const { modules, loading: dbModulesLoading, fetchModules, syncModules } = useModules();
 	const { askConfirm } = useConfirm();
 
@@ -81,7 +84,7 @@ export default function UserPage() {
 	};
 
 	// --- ADDED: ROLE HANDLERS ---
-	const handleOpenRoleManagement = async() => {
+	const handleOpenRoleManagement = async () => {
 		await Promise.all([
 			fetchRoles(),
 			fetchModules()
@@ -97,10 +100,17 @@ export default function UserPage() {
 			fetchRolePermission(role.id);
 		} else {
 			// Clear permissions state for "Create New" mode
-			fetchRolePermission(null);
+			clearRoleSelection();
 		}
 
 		setIsRoleEntryModalOpen(true);
+	};
+
+	const handleCloseRoleEntry = () => {
+		setIsRoleEntryModalOpen(false);
+		// Cleanup state AFTER the modal is closed so the user doesn't 
+		// see the fields disappear while the modal is still fading out.
+		setTimeout(() => clearRoleSelection(), 300);
 	};
 
 
@@ -111,9 +121,11 @@ export default function UserPage() {
 			message: 'This will update permissions for all users assigned to this role.'
 		});
 
-		if (isOk) {
-			const success = await saveRole(selectedRole?.id, formData);
-			if (success) setIsRoleEntryModalOpen(false);
+		if (!isOk) return;
+
+		const success = await saveRole(selectedRole?.id, formData);
+		if (success) {
+			handleCloseRoleEntry();
 		}
 	};
 
@@ -128,6 +140,7 @@ export default function UserPage() {
 			await syncModules();
 		}
 	};
+
 
 	// Column Definitions
 	const userColumns = [
@@ -239,7 +252,7 @@ export default function UserPage() {
 			{/* ADDED: Role Permission Entry Modal (The Matrix) */}
 			<Modal
 				isOpen={isRoleEntryModalOpen}
-				onClose={() => setIsRoleEntryModalOpen(false)}
+				onClose={handleCloseRoleEntry}
 				title={selectedRole ? `Edit Permissions: ${selectedRole.name}` : "Create New Role"}
 				size="xl"
 				footer={
@@ -256,7 +269,7 @@ export default function UserPage() {
 					</>
 				}
 			>
-				{/* MODIFIED: Ensure we pass a loading indicator if the data isn't ready yet */}
+				{/* Senior Tip: Check for rolePermissions only if we are in EDIT mode */}
 				{rolesLoading && selectedRole ? (
 					<div className="p-10 text-center">Loading Permissions...</div>
 				) : (
