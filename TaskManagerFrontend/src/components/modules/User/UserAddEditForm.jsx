@@ -1,5 +1,6 @@
 // MODIFIED: Removed internal buttons to allow Modal Footer usage
 import React, { useState, useEffect } from 'react';
+import { User } from 'lucide-react';
 import { Input } from '../../ui/Input';
 
 const initialFormState = { name: '' };
@@ -36,6 +37,7 @@ export default function UserAddEditForm({ initialData, onSubmit }) {
 		<form id="user-form" onSubmit={handleSubmit} className="space-y-4">
 			<Input
 				label="NAME"
+				startIcon={User} // PASSING THE COMPONENT
 				value={form.name}
 				onChange={(e) => setForm({ ...form, name: e.target.value })}
 				placeholder="e.g. Juan Carloz"

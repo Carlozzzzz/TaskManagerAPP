@@ -48,6 +48,7 @@ export default function UserPage() {
 
 	// --- USER HANDLERS ---
 	const handleOpenAddEditModal = (user) => {
+	console.log({user})
 		setSelectedUser(user);
 		setIsAddEditModalOpen(true);
 	};
