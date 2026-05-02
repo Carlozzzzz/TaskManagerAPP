@@ -19,7 +19,9 @@ namespace TaskManagerAPI.Data
 
 		// --- TABLES ---
 		public DbSet<TaskItem> Tasks { get; set; }
-		public DbSet<User> Users { get; set; }
+        public DbSet<EmployeeInformation> EmployeeInformations { get; set; }
+        public DbSet<EmployeePersonalInformation> EmployeePersonalInformations { get; set; }
+        public DbSet<User> Users { get; set; }
 		public DbSet<Role> Roles { get; set; }
 		public DbSet<Module> Modules { get; set; }
 		public DbSet<RoleModulePermission> RoleModulePermissions { get; set; }

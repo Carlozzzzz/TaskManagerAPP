@@ -43,12 +43,6 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// ─── Company module ────────────────────────────────────────────────────────
-// ADDED: ICompanyRepository registered — replaces generic repo for Company.
-// When ICompanyRepository is requested, DI resolves CompanyRepository
-// which extends Repository<Company> so all generic methods still work.
-builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
-builder.Services.AddScoped<ICompanyService, CompanyService>();
 
 // ─── Module module ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IModuleService, ModuleService>();
@@ -56,6 +50,16 @@ builder.Services.AddScoped<IModuleService, ModuleService>();
 // ─── Role module ────────────────────────────────────────────────────────
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+
+// ─── Company module ────────────────────────────────────────────────────────
+// ADDED: ICompanyRepository registered — replaces generic repo for Company.
+// When ICompanyRepository is requested, DI resolves CompanyRepository
+// which extends Repository<Company> so all generic methods still work.
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 // Dependency Injection: Services
 builder.Services.AddScoped<ITaskService, TaskService>();

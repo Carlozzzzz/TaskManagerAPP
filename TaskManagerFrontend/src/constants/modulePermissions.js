@@ -13,6 +13,10 @@ const modulePermissionsRaw = {
 		isStandalone: true,
 		items: [{ name: 'Home', to: '/dashboard', moduleKey: 'HOME', hasAccess: true }] // REPLACED: key/value with moduleKey
 	},
+	Personnels: {
+		icon: 'personnel',
+		items: [{ name: 'Employee', to: '/employee', moduleKey: 'EMPLOYEE', hasAccess: false }]
+	},
 	Maintenance: {
 		icon: 'maintenance',
 		items: [
