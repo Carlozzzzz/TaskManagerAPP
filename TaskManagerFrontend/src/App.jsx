@@ -18,6 +18,7 @@ import ClientPage from './pages/ClientPage';
 import DepartmentPage from './pages/DepartmentPage';
 import HomePage from './pages/HomePage';
 import UserPage from './pages/UserPage';
+import EmployeePage from './pages/Personnel/EmployeePage';
 
 export default function App() {
 	return (
@@ -54,6 +55,10 @@ function AppContent() {
 			>
 				{/* These "Child" routes will be rendered inside the MainLayout's <Outlet /> */}
 				<Route path="/dashboard" element={<HomePage />} />
+				
+				{/* Personnels */}
+				<Route path="/employee" element={<EmployeePage />} />
+				
 				<Route path="/tasks" element={<TasksPage />} />
 				<Route path="/users" element={<UserPage />} />
 				<Route path="/client" element={<ClientPage />} />

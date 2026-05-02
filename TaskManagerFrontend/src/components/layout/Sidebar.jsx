@@ -8,6 +8,7 @@ import { getAccessibleSidebar } from '../../utils/permissionUtils'; // ADDED
 
 import {
 	HomeRounded,
+	Diversity3Rounded,
 	BuildCircleRounded,
 	TerminalRounded,
 	GroupRounded,
@@ -15,11 +16,12 @@ import {
 	SecurityRounded,
 	ChevronLeftRounded,
 	CloseRounded,
-	HelpOutlineRounded
+	HelpOutlineRounded,
 } from '@mui/icons-material';
 
 const ICON_MAP = {
 	home: HomeRounded,
+	personnel: Diversity3Rounded,
 	maintenance: BuildCircleRounded,
 	dev: TerminalRounded,
 	tasks: AssignmentRounded,
