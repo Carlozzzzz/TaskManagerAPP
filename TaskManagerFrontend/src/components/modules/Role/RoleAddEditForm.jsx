@@ -4,17 +4,16 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { modulePermissions, accessType } from '../../../constants/modulePermissions';
 import Button from '../../ui/Button';
 
-export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit }) {
+export default function RoleAddEditForm({ initialData, onSubmit }) {
 	const [roleName, setRoleName] = useState(initialData?.name || '');
-
-	// MODIFIED: State now uses moduleKey as the object key for absolute reliability
+	// MODIFIED: State now uses moduleKey as the key: { [moduleKey]: { ...perms } }
 	const [permissions, setPermissions] = useState({});
 
 	useEffect(() => {
 		if (initialData?.permissions) {
 			const prefill = {};
 			initialData.permissions.forEach(p => {
-				// Map existing permissions from backend by their Key
+				// MODIFIED: Use moduleKey from backend DTO
 				prefill[p.moduleKey] = {
 					canView: p.canView, canAdd: p.canAdd,
 					canEdit: p.canEdit, canDelete: p.canDelete
@@ -34,6 +33,16 @@ export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit 
 		}));
 	};
 
+	const checkAll = () => {
+		const newPerms = {};
+		Object.values(modulePermissions).forEach(category => {
+			category.items.forEach(item => {
+				newPerms[item.moduleKey] = { canView: true, canAdd: true, canEdit: true, canDelete: true };
+			});
+		});
+		setPermissions(newPerms);
+	};
+
 	const handleRowToggle = (moduleKey) => {
 		const row = permissions[moduleKey];
 		const isAllChecked = row && row.canView && row.canAdd && row.canEdit && row.canDelete;
@@ -47,25 +56,13 @@ export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit 
 		}));
 	};
 
-	const checkAll = () => {
-		const newPerms = {};
-		Object.values(modulePermissions).forEach(category => {
-			category.items.forEach(item => {
-				newPerms[item.moduleKey] = { canView: true, canAdd: true, canEdit: true, canDelete: true };
-			});
-		});
-		setPermissions(newPerms);
-	};
-
 	const handleSubmit = (e) => {
 		e.preventDefault();
-
-		// MODIFIED: Formatting the payload to include ModuleKey (Required by Backend)
+		// MODIFIED: Formatting payload to use moduleKey
 		const formattedPermissions = Object.entries(permissions).map(([mKey, perms]) => ({
-			moduleKey: mKey, // ADDED: Critical missing property
+			moduleKey: mKey,
 			...perms
 		}));
-
 		onSubmit({ name: roleName, permissions: formattedPermissions });
 	};
 
@@ -86,10 +83,10 @@ export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit 
 				<div className="border-b border-gray-200 bg-gray-50/50 px-4 py-2">
 					<h3 className="text-sm font-semibold text-gray-700">Template Details</h3>
 				</div>
-				<div className="p-4">
+				<div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-2">
 					<div className="space-y-1">
 						<label className="text-xs font-bold uppercase text-gray-500">Description <span className="text-red-500">*</span></label>
-						<input className="w-full rounded border border-gray-300 p-2 text-sm outline-none focus:border-blue-500" value={roleName} onChange={e => setRoleName(e.target.value)} placeholder="Enter role description" required />
+						<input className="w-full rounded border border-gray-300 p-2 text-sm outline-none focus:border-blue-500" value={roleName} onChange={e => setRoleName(e.target.value)} placeholder="Enter template description" required />
 					</div>
 				</div>
 			</div>
@@ -102,7 +99,7 @@ export default function RoleAddEditForm({ initialData, dbModules = [], onSubmit 
 				<div className="space-y-8 p-4">
 					{Object.entries(modulePermissions).map(([category, config]) => (
 						<div key={category} className="overflow-hidden rounded-lg border border-gray-100">
-							<div className="bg-gray-100/80 px-4 py-2">
+							<div className="flex items-center gap-3 bg-gray-100/80 px-4 py-2">
 								<span className="text-sm font-bold text-gray-700">{category}</span>
 							</div>
 

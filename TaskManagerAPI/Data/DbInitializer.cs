@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TaskManagerAPI.Constants;
 using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.Data
@@ -33,7 +34,9 @@ namespace TaskManagerAPI.Data
             }
 
             // 3. Link Permissions (Only if the Role doesn't already have them)
-            var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+            var adminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == UserRoles.Admin);
+            var userRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == UserRoles.User);
+
             var homeModule = await context.Modules.FirstOrDefaultAsync(m => m.Key == "HOME");
             var userModule = await context.Modules.FirstOrDefaultAsync(m => m.Key == "USER");
 
@@ -54,6 +57,19 @@ namespace TaskManagerAPI.Data
                 if (!hasUserPerm)
                 {
                     context.Set<RoleModulePermission>().Add(CreateFullPermission(adminRole.Id, userModule.Id));
+                }
+
+                await context.SaveChangesAsync();
+            }
+
+            if (userRole != null && homeModule != null)
+            {
+                var hasHomePerm = await context.Set<RoleModulePermission>()
+                        .AnyAsync(p => p.RoleId == userRole.Id && p.ModuleId == homeModule.Id);
+
+                if (!hasHomePerm)
+                {
+                    context.Set<RoleModulePermission>().Add(CreateFullPermission(userRole.Id, homeModule.Id));
                 }
 
                 await context.SaveChangesAsync();

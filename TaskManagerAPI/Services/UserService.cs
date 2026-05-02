@@ -19,16 +19,18 @@ namespace TaskManagerAPI.Services
 	{
 		private readonly AppDbContext _context;
         private readonly IUnitOfWork _unitOfWork;
+		private readonly IRoleRepository _roleRepository;
 		public UserService(
-			AppDbContext context,
-			IUnitOfWork unitOfWork)
+            AppDbContext context,
+            IUnitOfWork unitOfWork,
+            IRoleRepository roleRepository)
         {
             _unitOfWork = unitOfWork;
-			_context = context;
-
+            _context = context;
+            _roleRepository = roleRepository;
         }
 
-		public async Task<List<UserDto>> GetAllUsersAsync()
+        public async Task<List<UserDto>> GetAllUsersAsync()
 		{
 			// SENIOR TIP: Use .Include() to fetch roles in ONE query (Avoids N+1 problem)
 			return await _context.Users
@@ -40,7 +42,6 @@ namespace TaskManagerAPI.Services
 						Id = u.Id,
 						Name = u.Name,
 						Email = u.Email,
-						// MODIFIED: Extract the names of all assigned roles
 						Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
 					})
 					.ToListAsync();

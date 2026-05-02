@@ -4,7 +4,7 @@ import DataTable from '../components/ui/DataTable';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
-import { Edit, Delete } from '@mui/icons-material'; // MODIFIED
+import Edit from '@mui/icons-material/Edit'; // MODIFIED
 
 import { useUsers } from '../hooks/useUsers';
 import { useRoles } from '../hooks/useRoles'; // ADDED
@@ -15,15 +15,29 @@ import RoleAddEditForm from '../components/modules/Role/RoleAddEditForm'; // ADD
 import Button from '../components/ui/Button';
 import PageTitle from '../components/ui/PageTitle';
 import Breadcrumb from '../components/ui/Breadcrumb';
-import { moduleService } from '../services/moduleService';
 import SyncIcon from '@mui/icons-material/Sync';
-import { useToast } from '../hooks/useToast';
+import { useModules } from '../hooks/useModules';
 
 export default function UserPage() {
-	const { allUsers, selectedUser, loading: usersLoading, setSelectedUser, updateUser, resetUserPassword } = useUsers();
-	const { roles, dbModules, loading: rolesLoading, fetchRolesAndModules, saveRole } = useRoles(); // ADDED
+	const {
+		allUsers,
+		selectedUser, setSelectedUser,
+		loading: usersLoading,
+		updateUser,
+		resetUserPassword
+	} = useUsers();
+	const {
+		roles,
+		rolePermissions,
+		selectedRole, setSelectedRole,
+		loading: rolesLoading,
+		fetchRoles,
+		fetchRolePermission,
+		clearRoleSelection,
+		saveRole
+	} = useRoles();
+	const { modules, loading: dbModulesLoading, fetchModules, syncModules } = useModules();
 	const { askConfirm } = useConfirm();
-	const { showToast } = useToast();
 
 	// User Modal States
 	const [isAddEditModalOpen, setIsAddEditModalOpen] = useState(false);
@@ -31,10 +45,10 @@ export default function UserPage() {
 	// ADDED: Role Modal States
 	const [isRoleListModalOpen, setIsRoleListModalOpen] = useState(false);
 	const [isRoleEntryModalOpen, setIsRoleEntryModalOpen] = useState(false);
-	const [selectedRole, setSelectedRole] = useState(null);
 
 	// --- USER HANDLERS ---
 	const handleOpenAddEditModal = (user) => {
+	console.log({user})
 		setSelectedUser(user);
 		setIsAddEditModalOpen(true);
 	};
@@ -71,15 +85,35 @@ export default function UserPage() {
 	};
 
 	// --- ADDED: ROLE HANDLERS ---
-	const handleOpenRoleManagement = () => {
-		fetchRolesAndModules();
+	const handleOpenRoleManagement = async () => {
+		await Promise.all([
+			fetchRoles(),
+			fetchModules()
+		]);
 		setIsRoleListModalOpen(true);
 	};
 
 	const handleOpenRoleEntry = (role = null) => {
 		setSelectedRole(role);
+
+		if (role) {
+			// Fetch fresh permissions from API for the selected role
+			fetchRolePermission(role.id);
+		} else {
+			// Clear permissions state for "Create New" mode
+			clearRoleSelection();
+		}
+
 		setIsRoleEntryModalOpen(true);
 	};
+
+	const handleCloseRoleEntry = () => {
+		setIsRoleEntryModalOpen(false);
+		// Cleanup state AFTER the modal is closed so the user doesn't 
+		// see the fields disappear while the modal is still fading out.
+		setTimeout(() => clearRoleSelection(), 300);
+	};
+
 
 	const handleRoleSubmit = async (formData) => {
 		const isOk = await askConfirm({
@@ -88,29 +122,26 @@ export default function UserPage() {
 			message: 'This will update permissions for all users assigned to this role.'
 		});
 
-		if (isOk) {
-			const success = await saveRole(selectedRole?.id, formData);
-			if (success) setIsRoleEntryModalOpen(false);
+		if (!isOk) return;
+
+		const success = await saveRole(selectedRole?.id, formData);
+		if (success) {
+			handleCloseRoleEntry();
 		}
 	};
 
 	const handleSyncModules = async () => {
-		try {
-			const isOk = await askConfirm({
-				title: 'Sync Modules?',
-				message: 'This will align the database with your current app configuration. Continue?',
-				type: 'warning'
-			});
+		const isOk = await askConfirm({
+			title: 'Sync Modules?',
+			message: 'This will align the database with your current app configuration. Continue?',
+			type: 'warning'
+		});
 
-			if (isOk) {
-				await moduleService.syncWithConfig();
-				showToast("Modules synced with database successfully", "success");
-				fetchRolesAndModules(); // Refresh the list
-			}
-		} catch (err) {
-			showToast("Failed to sync modules", "error");
+		if (isOk) {
+			await syncModules();
 		}
 	};
+
 
 	// Column Definitions
 	const userColumns = [
@@ -222,21 +253,33 @@ export default function UserPage() {
 			{/* ADDED: Role Permission Entry Modal (The Matrix) */}
 			<Modal
 				isOpen={isRoleEntryModalOpen}
-				onClose={() => setIsRoleEntryModalOpen(false)}
+				onClose={handleCloseRoleEntry}
 				title={selectedRole ? `Edit Permissions: ${selectedRole.name}` : "Create New Role"}
 				size="xl"
 				footer={
 					<>
 						<Button variant="ghost" name="Back" onClick={() => setIsRoleEntryModalOpen(false)} />
-						<Button type="submit" form="role-form" variant="primary" name="Save Permissions" />
+						{/* ADDED: Disable save button while loading permissions */}
+						<Button
+							type="submit"
+							form="role-form"
+							variant="primary"
+							name="Save Permissions"
+							disabled={rolesLoading}
+						/>
 					</>
 				}
 			>
-				<RoleAddEditForm
-					initialData={selectedRole}
-					dbModules={dbModules}
-					onSubmit={handleRoleSubmit}
-				/>
+				{/* Senior Tip: Check for rolePermissions only if we are in EDIT mode */}
+				{rolesLoading && selectedRole ? (
+					<div className="p-10 text-center">Loading Permissions...</div>
+				) : (
+					<RoleAddEditForm
+						initialData={rolePermissions} // This now gets fresh data from the fetch
+						modules={modules}
+						onSubmit={handleRoleSubmit}
+					/>
+				)}
 			</Modal>
 		</div>
 	);

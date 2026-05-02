@@ -1,4 +1,6 @@
 // Constants/UserRoles.cs
+
+// This class is used for populating the seeder for initial access template data
 namespace TaskManagerAPI.Constants
 {
 	public static class UserRoles

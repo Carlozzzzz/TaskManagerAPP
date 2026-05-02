@@ -46,7 +46,7 @@ namespace TaskManagerAPI.Services
 
             // // MODIFIED: Logic to detect first user
             var isFirstUser = !await _context.Users.IgnoreQueryFilters().AnyAsync();
-            var roleName = isFirstUser ? "Admin" : "User";
+            var roleName = isFirstUser ? UserRoles.Admin : UserRoles.User;
 
             // // MODIFIED: Find existing role from Seeder
             var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
@@ -94,7 +94,6 @@ namespace TaskManagerAPI.Services
             string defaultPassword = "password";
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(defaultPassword);
-			user.Name = "Carlos Romulo";
 
             await _context.SaveChangesAsync();
 
@@ -117,19 +116,19 @@ namespace TaskManagerAPI.Services
 						CanAdd = g.Any(x => x.CanAdd),
 						CanEdit = g.Any(x => x.CanEdit),
 						CanDelete = g.Any(x => x.CanDelete),
-						// Implicit View Rule: If they can do anything, they can view.
+						// Implicit View Rule: If they cant do anything, they can view.
 						CanView = g.Any(x => x.CanView || x.CanAdd || x.CanEdit || x.CanDelete)
 					}).ToList();
 		}
 
-		private string GenerateToken(User user, string role)
+		private string GenerateToken(User user, string roleName)
 		{
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
 			var claims = new List<Claim> {
 						new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
 
                         new Claim(ClaimTypes.Name, user.Name),
-                        new Claim(ClaimTypes.Role, role)
+                        new Claim(ClaimTypes.Role, roleName)
 				};
 
             var token = new JwtSecurityToken(
