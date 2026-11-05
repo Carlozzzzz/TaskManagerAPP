@@ -1,0 +1,17 @@
+{
+  "profile": "taskmanager",
+  "name": "TaskManagerAPP",
+  "description": "ASP.NET Core 9 REST API (Controllers-Service-Repository, EF Core, SQL Server) with a React 19 + Vite + MUI frontend.",
+  "askOnStart": false,
+  "packs": [
+    "process/no-drafts"
+  ],
+  "paths": {
+    "docsDir": "_notes"
+  },
+  "commands": {
+    "build": "dotnet build TaskManagerAPI/TaskManagerAPI.csproj",
+    "test": ""
+  },
+  "local": {}
+}
